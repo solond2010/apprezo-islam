@@ -417,7 +417,7 @@ function SurahList({ onSelect, darkMode }) {
             className={`w-full flex items-center justify-between px-4 py-4 rounded-xl shadow-sm border text-left active:scale-[0.98] transition-all duration-150 ${
               darkMode
                 ? 'bg-[#1e1e1e] border-[#2a2a2a] active:bg-[#2a2a2a]'
-                : 'bg-white border-slate-200 active:bg-slate-50'
+                : 'bg-[#FFFBF2] border-[#EDE3D3] active:bg-[#F5ECD8]'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -560,7 +560,7 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
 
       {/* Header */}
       <div className={`flex items-center gap-3 pt-4 pb-3 sticky top-0 z-10 ${
-        darkMode ? 'bg-[#121212]' : 'bg-gray-50'
+        darkMode ? 'bg-[#121212]' : 'bg-[#F7F1E6]'
       }`}>
         <button
           onClick={onBack}

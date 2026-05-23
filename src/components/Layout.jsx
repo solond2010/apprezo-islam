@@ -8,7 +8,7 @@ import Aprender from '../pages/Aprender'
 import Ajustes from '../pages/Ajustes'
 
 const tabs = [
-  { label: 'El Rezo', icon: BookHeart, component: ElRezo },
+  { label: 'Mihrab', icon: BookHeart, component: ElRezo },
   { label: 'Surahs', icon: BookHeadphones, component: Surahs },
   { label: 'Aprender', icon: GraduationCap, component: Aprender },
   { label: 'Ajustes', icon: Settings, component: Ajustes },
@@ -20,7 +20,7 @@ export default function Layout() {
   const ActivePage = tabs[active].component
 
   return (
-    <div className={`h-[100dvh] flex flex-col ${darkMode ? 'bg-[#121212]' : 'bg-gray-50'}`}>
+    <div className={`h-[100dvh] flex flex-col ${darkMode ? 'bg-[#121212]' : 'bg-[#F7F1E6]'}`}>
       <main className="flex-1 overflow-y-auto px-4 pb-2">
         <AnimatePresence mode="wait">
           <motion.div
@@ -38,7 +38,7 @@ export default function Layout() {
       <nav className={`flex-shrink-0 flex items-center justify-around px-2 pt-2 pb-8 md:pb-4 pb-[env(safe-area-inset-bottom)] border-t ${
         darkMode
           ? 'bg-[#1e1e1e] border-[#2a2a2a]'
-          : 'bg-white border-gray-200'
+          : 'bg-[#FBF6EE] border-[#E8DDD0]'
       }`}>
         {tabs.map((tab, i) => {
           const Icon = tab.icon

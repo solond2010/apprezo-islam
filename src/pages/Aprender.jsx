@@ -69,7 +69,7 @@ function TopicCard({ topic, onOpen }) {
     <motion.button
       whileTap={{ scale: 0.98 }}
       onClick={() => onOpen(topic)}
-      className="w-full bg-white rounded-xl shadow-sm border border-slate-200 p-4 text-left active:bg-slate-50 transition-colors"
+      className="w-full bg-[#FFFBF2] rounded-xl shadow-sm border border-[#EDE3D3] p-4 text-left active:bg-[#F5ECD8] transition-colors"
     >
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center shrink-0 mt-0.5">
@@ -101,7 +101,7 @@ function Modal({ topic, onClose }) {
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="bg-white w-full max-w-lg max-h-[85vh] rounded-t-2xl sm:rounded-2xl flex flex-col overflow-hidden"
+        className="bg-[#FFFBF2] w-full max-w-lg max-h-[85vh] rounded-t-2xl sm:rounded-2xl flex flex-col overflow-hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -172,7 +172,7 @@ export default function Aprender() {
           placeholder="Buscar temas..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-colors"
+          className="w-full pl-9 pr-4 py-2.5 bg-[#FFFBF2] border border-[#EDE3D3] rounded-xl text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-colors"
         />
       </div>
 

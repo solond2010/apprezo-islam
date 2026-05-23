@@ -86,7 +86,7 @@ function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio }) {
   const isPlaying = playingAudioKey === sessionKey
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 px-4 py-4 mb-3">
+    <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] px-4 py-4 mb-3">
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
         <PostureIcon position={step.position} />
@@ -251,7 +251,7 @@ export default function PrayerGuide({ onBack }) {
               className={`shrink-0 flex flex-col items-center gap-0.5 py-2.5 px-4 rounded-xl transition-all duration-200 active:scale-90 ${
                 active
                   ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-white text-gray-600 border border-gray-200'
+                  : 'bg-[#FFFBF2] text-gray-600 border border-[#EDE3D3]'
               }`}
             >
               <span className={`text-sm font-semibold ${active ? 'text-white' : 'text-gray-800'}`}>

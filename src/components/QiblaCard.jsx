@@ -2,7 +2,7 @@ export default function QiblaCard({ onClick }) {
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-5 flex items-center gap-3 px-5 py-4 cursor-pointer active:scale-[0.98] transition-transform"
+      className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] shadow-sm mb-5 flex items-center gap-3 px-5 py-4 cursor-pointer active:scale-[0.98] transition-transform"
     >
       <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-xl flex-shrink-0">
         🧭

@@ -4,7 +4,7 @@ import { Text, Sun, Moon, Minus, Plus } from 'lucide-react'
 
 function SettingRow({ icon: Icon, label, children }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-4 flex items-center justify-between">
+    <div className="bg-[#FFFBF2] rounded-xl shadow-sm border border-[#EDE3D3] px-4 py-4 flex items-center justify-between">
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
           <Icon size={18} className="text-emerald-600" />

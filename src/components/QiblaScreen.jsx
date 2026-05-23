@@ -89,7 +89,7 @@ function QiblaCompass({ latitude, longitude }) {
 
   if (permissionState === 'idle' || permissionState === 'requesting') {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col items-center">
+      <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] shadow-sm p-5 flex flex-col items-center">
         <div className="relative w-52 h-52">
           <svg viewBox="0 0 200 200" className="w-full h-full">
             <circle cx="100" cy="100" r="92" fill="none" stroke="#e5e7eb" strokeWidth="1.5" />
@@ -113,7 +113,7 @@ function QiblaCompass({ latitude, longitude }) {
 
   if (permissionState === 'denied') {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col items-center">
+      <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] shadow-sm p-5 flex flex-col items-center">
         <div className="relative w-52 h-52">
           <svg viewBox="0 0 200 200" className="w-full h-full">
             <circle cx="100" cy="100" r="92" fill="none" stroke="#e5e7eb" strokeWidth="1.5" />
@@ -136,7 +136,7 @@ function QiblaCompass({ latitude, longitude }) {
   const showStatic = permissionState === 'unavailable' || deviceHeading === null
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col items-center">
+    <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] shadow-sm p-5 flex flex-col items-center">
       <div className="relative w-52 h-52 flex items-center justify-center">
         <svg viewBox="0 0 200 200" width="100%" style={{ maxWidth: '220px' }}>
           <circle cx="100" cy="100" r="90" fill="#f9fafb" stroke="#e5e7eb" strokeWidth="1.5"/>
@@ -194,7 +194,7 @@ function QiblaCompass({ latitude, longitude }) {
 
 function QiblaVerse() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-4">
+    <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] p-4">
       <p
         className="text-right text-emerald-600 text-lg leading-loose mb-3 pb-3 border-b border-emerald-50"
         dir="rtl"
@@ -225,7 +225,7 @@ function QiblaVerse() {
 export default function QiblaScreen({ latitude, longitude, onBack }) {
   return (
     <div className="min-h-screen bg-[#f2f2f7] flex flex-col">
-      <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3">
+      <div className="bg-[#FFFBF2] border-b border-[#EDE3D3] px-4 py-4 flex items-center gap-3">
         <button
           onClick={onBack}
           className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-emerald-500 font-bold text-lg"

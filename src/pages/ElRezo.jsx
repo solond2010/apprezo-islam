@@ -99,12 +99,22 @@ function HeroSection() {
   const { darkMode } = useSettings()
   return (
     <div className="relative h-52 -mx-4 -mt-4 mb-6 overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('/fotos/meca.jpg')" }}>
-      <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-white/30 ${darkMode ? 'to-[#1e1e1e]' : 'to-white'}`} />
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+      {/* Warm amber/terracotta tint overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#6B3A1F]/30 via-[#A06A38]/10 to-transparent" />
+      <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-transparent ${darkMode ? 'to-[#1e1e1e]' : 'to-[#F7F1E6]'}`} />
+      <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#3D1E08]/55 to-transparent pointer-events-none" />
       <KaabaSilhouette />
       <div className="absolute bottom-5 left-0 right-0 px-4 z-10">
-        <h1 className="text-2xl font-bold text-white drop-shadow-md">El Rezo</h1>
-        <p className="text-sm text-white/90 drop-shadow-md">Tu guía para aprender a rezar</p>
+        <div className="flex items-center gap-2.5 mb-0.5">
+          <img
+            src="/fotos/logo1.png"
+            alt="Mihrab"
+            className="h-9 w-auto drop-shadow-md"
+            style={{ filter: 'brightness(0) invert(1)' }}
+          />
+          <h1 className="text-2xl font-bold text-white drop-shadow-md">Mihrab</h1>
+        </div>
+        <p className="text-sm text-white/90 drop-shadow-md">Aprende a rezar</p>
       </div>
     </div>
   )
@@ -114,7 +124,7 @@ function PrayerTimesCard({ timings, locationName, nextPrayer, timeLeft }) {
   const prayerNames = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 px-5 py-5 mb-5">
+    <div className="bg-[#FFFBF2]/90 backdrop-blur-sm rounded-2xl shadow-sm border border-[#EDE3D3] px-5 py-5 mb-5">
       <div className="flex items-center gap-2 mb-4">
         <MapPin size={14} className="text-emerald-600" />
         <span className="text-xs text-gray-500">{locationName}</span>
@@ -159,7 +169,7 @@ function PrayerTimesCard({ timings, locationName, nextPrayer, timeLeft }) {
 
 function LoadingSkeleton() {
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 px-5 py-5 mb-5 animate-pulse">
+    <div className="bg-[#FFFBF2]/90 backdrop-blur-sm rounded-2xl shadow-sm border border-[#EDE3D3] px-5 py-5 mb-5 animate-pulse">
       <div className="h-3 w-32 bg-gray-200 rounded mb-4" />
       {[...Array(5)].map((_, i) => (
         <div key={i} className="flex items-center justify-between py-1.5">
@@ -250,7 +260,7 @@ export default function ElRezo() {
       >
         <div className="text-left">
           <span className="text-sm font-semibold">Guía Paso a Paso para Rezar</span>
-          <p className="text-xs text-emerald-100 mt-0.5">Sigue cada movimiento con audio y texto</p>
+          <p className="text-xs text-[#F5E5D0] mt-0.5">Sigue cada movimiento con audio y texto</p>
         </div>
         <ArrowRight size={18} />
       </button>
