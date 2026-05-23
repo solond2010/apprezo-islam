@@ -308,7 +308,7 @@ function VerseCard() {
     } catch {}
 
     const ref = DAILY_VERSES[getDayOfYear() % DAILY_VERSES.length]
-    fetch(`https://api.alquran.cloud/v1/ayah/${ref}/editions/quran-uthmani,es.cortes`)
+    fetch(`https://api.alquran.cloud/v1/ayah/${ref}/editions/quran-uthmani,es.garcia`)
       .then(r => r.json())
       .then(data => {
         if (data.code === 200) {
@@ -368,7 +368,7 @@ function VerseCard() {
             {verse.arabic}
           </p>
           {/* Traducción española */}
-          <p className="text-xs text-gray-600 leading-relaxed italic border-t border-amber-100 pt-2">
+          <p className="text-sm text-gray-600 leading-relaxed italic border-t border-amber-100 pt-2">
             &ldquo;{verse.translation}&rdquo;
           </p>
         </div>
