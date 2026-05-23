@@ -70,12 +70,7 @@ function KaabaSilhouette() {
 function HeroSection() {
   const { darkMode } = useSettings()
   return (
-    <div className="relative h-52 -mx-4 -mt-4 mb-6 overflow-hidden">
-      <img
-        src="https://images.pexels.com/photos/1671478/pexels-photo-1671478.jpeg?auto=compress&cs=tinysrgb&w=800"
-        alt="Amanecer pastel"
-        className="w-full h-full object-cover"
-      />
+    <div className="relative h-52 -mx-4 -mt-4 mb-6 overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('/fotos/descarga.png')" }}>
       <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-white/30 ${darkMode ? 'to-[#1e1e1e]' : 'to-white'}`} />
       <KaabaSilhouette />
       <div className="absolute bottom-5 left-0 right-0 px-4">
