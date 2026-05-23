@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { MapPin, Sunrise, Sun, CloudSun, Sunset, Moon, ArrowRight, Compass } from 'lucide-react'
+import { MapPin, Sunrise, Sun, CloudSun, Sunset, Moon, ArrowRight, Compass, Clock } from 'lucide-react'
 import { useSettings } from '../context/SettingsContext'
 import PrayerGuide from './PrayerGuide'
 
@@ -98,10 +98,11 @@ function HeroSection() {
   return (
     <div className="relative h-52 -mx-4 -mt-4 mb-6 overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('/fotos/meca.jpg')" }}>
       <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-white/30 ${darkMode ? 'to-[#1e1e1e]' : 'to-white'}`} />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
       <KaabaSilhouette />
-      <div className="absolute bottom-5 left-0 right-0 px-4">
-        <h1 className="text-2xl font-bold text-white drop-shadow-lg">El Rezo</h1>
-        <p className="text-sm text-white/80 drop-shadow">Tu guía para aprender a rezar</p>
+      <div className="absolute bottom-5 left-0 right-0 px-4 z-10">
+        <h1 className="text-2xl font-bold text-white drop-shadow-md">El Rezo</h1>
+        <p className="text-sm text-white/90 drop-shadow-md">Tu guía para aprender a rezar</p>
       </div>
     </div>
   )
@@ -142,11 +143,16 @@ function PrayerTimesCard({ timings, locationName, nextPrayer, timeLeft }) {
       </div>
 
       {nextPrayer && (
-        <div className="mt-5 -mx-5 -mb-5 bg-emerald-600 rounded-b-2xl px-5 py-4 text-white">
-          <div className="text-xs text-emerald-100/80 mb-0.5">Próximo rezo</div>
-          <div className="text-lg font-bold">{nextPrayer.name}</div>
-          <div className="text-2xl font-mono font-bold mt-1 tabular-nums tracking-wider">
-            {timeLeft}
+        <div className="border-t border-gray-100 mt-4 pt-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+              <Clock size={13} className="text-emerald-600" />
+            </div>
+            <span className="text-xs text-gray-600 leading-relaxed">
+              Próximo rezo: <strong className="text-gray-800 font-semibold">{nextPrayer.name}</strong>
+              <span className="text-gray-300 mx-1.5">·</span>
+              <span className="text-emerald-600 font-medium tabular-nums">{timeLeft}</span>
+            </span>
           </div>
         </div>
       )}
