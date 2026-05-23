@@ -78,7 +78,7 @@ export default function Layout() {
             <button
               key={tab.label}
               onClick={() => setActive(i)}
-              className="flex flex-col items-center gap-1 pt-1 px-3 transition-all duration-200 active:scale-90 relative"
+              className="flex flex-col items-center gap-0.5 px-3 transition-all duration-200 active:scale-90 relative"
             >
               {isActive && (
                 <motion.div

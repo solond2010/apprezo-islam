@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X, Droplets, ShieldCheck, AlertTriangle, ChevronRight } from 'lucide-react'
+import { Search, X, Waves, Shield, CircleAlert, ChevronRight, Star, BookMarked, MessageSquare, BookOpen, Heart, Shirt, Repeat2 } from 'lucide-react'
 
 const topics = [
   {
     id: 1,
     title: 'La Ablución (Wudu)',
     subtitle: 'Purificación antes del rezo',
-    icon: Droplets,
+    icon: Waves,
     content: [
       'El Wudu es la purificación que todo musulmán debe realizar antes de cada rezo. Allah dice en el Corán: "¡Oh, creyentes! Cuando os dispongáis a rezar, lavaos el rostro y los brazos hasta los codos, pasaos las manos húmedas por la cabeza y lavaos los pies hasta los tobillos" (5:6).',
       'Pasos del Wudu:',
@@ -28,7 +28,7 @@ const topics = [
     id: 2,
     title: 'Condiciones para el Rezo',
     subtitle: 'Requisitos antes de comenzar a rezar',
-    icon: ShieldCheck,
+    icon: Shield,
     content: [
       'Antes de comenzar cualquier rezo (Salat), deben cumplirse estas condiciones esenciales:',
       '1. ESTAR EN ESTADO DE PUREZA: Haber realizado el Wudu (o Ghusl si es necesario). Sin purificación, el rezo no es válido.',
@@ -44,7 +44,7 @@ const topics = [
     id: 3,
     title: 'Errores al Rezar',
     subtitle: 'Cómo corregir equivocaciones en el Salat',
-    icon: AlertTriangle,
+    icon: CircleAlert,
     content: [
       'Es normal equivocarse, especialmente cuando estás aprendiendo. El Islam es una religión de facilidad. Aquí te explicamos qué hacer:',
       'ERRORES LEVES (OLVIDOS):',
@@ -59,6 +59,84 @@ const topics = [
       '- Cómo hacerlo: después del Tashahhud final, di Salam solo a la derecha, luego haz dos Sujud adicionales repitiendo "Subhana Rabbiyal A\'la" en cada uno, luego completa el Taslim.',
       'CONSEJO IMPORTANTE:',
       'Cuando tengas dudas, elige la opción más segura. Si no estás seguro de cuántas Rak\'ahs has rezado, asume la menor cantidad y completa. ¡No te angusties! Allah ve tu esfuerzo y te recompensará por ello.',
+    ],
+  },
+  {
+    id: 4,
+    title: '¿Qué es "Fard"?',
+    subtitle: 'Lo obligatorio en el Islam',
+    icon: Star,
+    content: [
+      'Fard (o Farz) significa obligatorio. Son los mandamientos directos e innegociables dictados por Allah.',
+      'La regla: Si lo haces, recibes recompensa divina. Si lo omites intencionadamente, cometes un pecado grave.',
+      'Ejemplos: Realizar los 5 rezos diarios, ayunar en el mes de Ramadán o pagar la caridad obligatoria (Zakat).',
+    ],
+  },
+  {
+    id: 5,
+    title: '¿Qué es "Sunnah"?',
+    subtitle: 'Las enseñanzas del Profeta',
+    icon: BookMarked,
+    content: [
+      'Sunnah engloba las enseñanzas, acciones, hábitos y aprobaciones del Profeta Muhammad. En términos de práctica diaria, se refiere a lo recomendado.',
+      'La regla: Si lo haces, ganas una inmensa recompensa adicional y sigues el ejemplo del Profeta. Si no lo haces, no cometes pecado, pero te pierdes esa bendición.',
+      'Ejemplos: Rezar oraciones voluntarias, sonreír a los demás, o romper el ayuno con dátiles.',
+    ],
+  },
+  {
+    id: 6,
+    title: '¿Qué es un "Hadith"?',
+    subtitle: 'Las narraciones del Profeta Muhammad',
+    icon: MessageSquare,
+    content: [
+      'Un Hadith (Hadiz) es un relato o narración registrada que documenta exactamente lo que el Profeta Muhammad dijo, hizo o aprobó en vida.',
+      'Importancia: Es la segunda fuente de conocimiento del Islam después del Corán. El Corán nos da la orden general (ejemplo: "estableced la oración"), y el Hadith nos explica el detalle práctico ("rezad de la forma en que me habéis visto rezar").',
+      'Grados: Los eruditos los investigaron exhaustivamente. Un Hadith catalogado como Sahih significa que es auténtico y 100% fiable.',
+    ],
+  },
+  {
+    id: 7,
+    title: '¿Qué es una "Surah" y una "Ayah"?',
+    subtitle: 'Los capítulos y versículos del Corán',
+    icon: BookOpen,
+    content: [
+      'Surah: Es un capítulo del Sagrado Corán. El libro está dividido en 114 Surahs de diferentes longitudes (la más corta tiene 3 frases, la más larga casi 300).',
+      'Ayah: Es un versículo o frase dentro de una Surah. Su traducción literal es "señal" o "milagro".',
+      'Ejemplo: La primera Surah del Corán se llama Al-Fatiha (La Apertura) y contiene 7 Ayahs. Es obligatorio recitarla en cada unidad de rezo.',
+    ],
+  },
+  {
+    id: 8,
+    title: '¿Qué es la "Niyyah"?',
+    subtitle: 'La intención en el corazón',
+    icon: Heart,
+    content: [
+      'Niyyah significa intención. Es el motor interno de todo acto en el Islam, ya que "las acciones valen según sus intenciones".',
+      'Cómo se hace: Es un acto exclusivo del corazón y la mente. Pronunciarla en voz alta es un error común que no pertenece a la práctica auténtica. Solo necesitas tener claro en tu mente qué vas a hacer y que lo haces por Allah.',
+      'Su función: Diferencia un acto cotidiano de un acto de adoración. (Por ejemplo, ducharse para refrescarse por el calor vs. ducharse con la intención de realizar la purificación ritual).',
+    ],
+  },
+  {
+    id: 9,
+    title: 'La Vestimenta (Awrah)',
+    subtitle: 'Las partes del cuerpo que deben cubrirse',
+    icon: Shirt,
+    content: [
+      'La Awrah define las partes del cuerpo que deben estar cubiertas de forma obligatoria para presentarse ante Dios en oración (y en público).',
+      'El Hombre: Debe cubrir obligatoriamente desde el ombligo hasta la rodilla (ambos inclusive). Por respeto, es altamente necesario cubrir también los hombros durante el rezo (evitar rezar sin camiseta).',
+      'La Mujer: Debe cubrir todo su cuerpo, incluyendo el cabello, el cuello y los pies, dejando al descubierto únicamente el rostro y las manos.',
+      'Requisito universal: Para ambos, la ropa de rezo debe estar limpia de impurezas, no debe ser transparente ni excesivamente ceñida al cuerpo.',
+    ],
+  },
+  {
+    id: 10,
+    title: "¿Qué es una \"Rak'ah\"?",
+    subtitle: 'Una unidad completa del rezo',
+    icon: Repeat2,
+    content: [
+      "Una Rak'ah es una unidad o ciclo de movimientos que compone la oración islámica.",
+      "Cada rezo tiene un número específico de Rak'ahs (Fajr tiene 2, Maghrib tiene 3, etc.).",
+      "El ciclo exacto: Una Rak'ah siempre consiste en: ponerse de pie y recitar el Corán, inclinarse apoyando las manos en las rodillas (Ruku), volver a levantarse, postrarse en el suelo apoyando la frente (Sujud), sentarse brevemente y hacer una segunda postración. Al levantarse de esa segunda postración, se ha completado una Rak'ah.",
     ],
   },
 ]
