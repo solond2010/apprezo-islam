@@ -358,7 +358,8 @@ function VerseCard() {
           <div className="h-3 bg-gray-100 rounded animate-pulse w-2/3" />
         </div>
       ) : verse ? (
-        <div className="space-y-3">
+        <div className="space-y-2">
+          {/* Árabe */}
           <p
             className="text-lg leading-loose text-amber-800 text-right font-medium"
             dir="rtl"
@@ -366,7 +367,8 @@ function VerseCard() {
           >
             {verse.arabic}
           </p>
-          <p className="text-xs text-gray-600 italic leading-relaxed border-t border-amber-100 pt-2">
+          {/* Traducción española */}
+          <p className="text-xs text-gray-600 leading-relaxed italic border-t border-amber-100 pt-2">
             &ldquo;{verse.translation}&rdquo;
           </p>
         </div>
