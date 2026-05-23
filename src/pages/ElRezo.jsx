@@ -4,6 +4,7 @@ import { MapPin, Sunrise, Sun, CloudSun, Sunset, Moon, ArrowRight, Clock } from 
 import { useSettings } from '../context/SettingsContext'
 import PrayerGuide from './PrayerGuide'
 import QiblaCard from '../components/QiblaCard'
+import QiblaScreen from '../components/QiblaScreen'
 
 const FALLBACK_COORDS = { lat: 40.4168, lon: -3.7038 }
 
@@ -181,6 +182,7 @@ export default function ElRezo() {
   const [nextPrayer, setNextPrayer] = useState(null)
   const [timeLeft, setTimeLeft] = useState('--:--:--')
   const [userCoords, setUserCoords] = useState(null)
+  const [currentScreen, setCurrentScreen] = useState('home')
 
   useEffect(() => {
     let cancelled = false
@@ -224,6 +226,16 @@ export default function ElRezo() {
     return () => clearInterval(id)
   }, [timings])
 
+  if (currentScreen === 'qibla' && userCoords) {
+    return (
+      <QiblaScreen
+        latitude={userCoords.lat}
+        longitude={userCoords.lon}
+        onBack={() => setCurrentScreen('home')}
+      />
+    )
+  }
+
   if (showGuide) {
     return <PrayerGuide onBack={() => setShowGuide(false)} />
   }
@@ -235,7 +247,7 @@ export default function ElRezo() {
       {loading ? <LoadingSkeleton /> : (
         <>
           <PrayerTimesCard timings={timings} locationName={locationName} nextPrayer={nextPrayer} timeLeft={timeLeft} />
-          {userCoords && <QiblaCard latitude={userCoords.lat} longitude={userCoords.lon} />}
+          {userCoords && <QiblaCard onClick={() => setCurrentScreen('qibla')} />}
         </>
       )}
 
