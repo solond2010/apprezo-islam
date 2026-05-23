@@ -244,16 +244,9 @@ export default function ElRezo() {
     <div className="pt-4">
       <HeroSection />
 
-      {loading ? <LoadingSkeleton /> : (
-        <>
-          <PrayerTimesCard timings={timings} locationName={locationName} nextPrayer={nextPrayer} timeLeft={timeLeft} />
-          {userCoords && <QiblaCard onClick={() => setCurrentScreen('qibla')} />}
-        </>
-      )}
-
       <button
         onClick={() => setShowGuide(true)}
-        className="w-full flex items-center justify-between bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-2xl px-5 py-4 transition-all duration-200 shadow-sm mb-6"
+        className="w-full flex items-center justify-between bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-2xl px-5 py-4 transition-all duration-200 shadow-sm mb-5"
       >
         <div className="text-left">
           <span className="text-sm font-semibold">Guía Paso a Paso para Rezar</span>
@@ -261,6 +254,13 @@ export default function ElRezo() {
         </div>
         <ArrowRight size={18} />
       </button>
+
+      {loading ? <LoadingSkeleton /> : (
+        <>
+          <PrayerTimesCard timings={timings} locationName={locationName} nextPrayer={nextPrayer} timeLeft={timeLeft} />
+          {userCoords && <QiblaCard onClick={() => setCurrentScreen('qibla')} />}
+        </>
+      )}
     </div>
   )
 }
