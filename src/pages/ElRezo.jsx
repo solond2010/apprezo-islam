@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { MapPin, Sunrise, Sun, CloudSun, Sunset, Moon, ArrowRight, Compass, Clock } from 'lucide-react'
+import { MapPin, Sunrise, Sun, CloudSun, Sunset, Moon, ArrowRight, Clock } from 'lucide-react'
 import { useSettings } from '../context/SettingsContext'
 import PrayerGuide from './PrayerGuide'
 
@@ -137,22 +137,17 @@ function PrayerTimesCard({ timings, locationName, nextPrayer, timeLeft }) {
         })}
       </div>
 
-      <div className="border-t border-gray-100 mt-4 pt-3 flex items-center gap-2">
-        <Compass size={12} className="text-gray-400" />
-        <span className="text-xs text-gray-400">Horarios calculados para hoy</span>
-      </div>
-
       {nextPrayer && (
-        <div className="border-t border-gray-100 mt-4 pt-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
-              <Clock size={13} className="text-emerald-600" />
+        <div className="mt-5 bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Clock size={13} className="text-emerald-500" />
+                <span className="text-[10px] text-emerald-600 font-semibold uppercase tracking-widest">Próximo rezo</span>
+              </div>
+              <span className="text-xl font-bold text-slate-800">{nextPrayer.name}</span>
             </div>
-            <span className="text-xs text-gray-600 leading-relaxed">
-              Próximo rezo: <strong className="text-gray-800 font-semibold">{nextPrayer.name}</strong>
-              <span className="text-gray-300 mx-1.5">·</span>
-              <span className="text-emerald-600 font-medium tabular-nums">{timeLeft}</span>
-            </span>
+            <span className="text-3xl font-black text-emerald-600 tracking-tighter tabular-nums">{timeLeft}</span>
           </div>
         </div>
       )}
