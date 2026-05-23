@@ -9,11 +9,11 @@ function quranAudio(surah, ...ayahs) {
   return ayahs.map((a) => `${EA}/${s}${String(a).padStart(3, '0')}.mp3`)
 }
 
-// Recitador: Saleh As-Saleh (salafiaudio WordPress CDN)
-// Pasos del rezo (takbir, ruku, sujud, tashahhud, salam…)
-const SA = 'https://salafiaudio.files.wordpress.com/2015/03/salah-step-by-step-audio-saleh-as-saleh'
-function salafiAudio(nn) {
-  return [`${SA}-${String(nn).padStart(2, '0')}.mp3`]
+// Dhikrs del rezo: al-hamdoulillah.com (Hisnul Muslim CDN, audio limpio)
+// Clips individuales por número de invocación
+const AH = 'https://www.al-hamdoulillah.com/invocations/mp3'
+function dhikrAudio(n) {
+  return [`${AH}/${n}.mp3`]
 }
 
 export const PRAYER_RAKAATS = {
@@ -52,7 +52,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Allāhu Akbar',
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
-    audioUrls: salafiAudio(1),
+    audioUrls: null,
     repeat: 1,
     onlyFirstRakaa: true,
   },
@@ -70,7 +70,7 @@ export const PRAYER_STEPS = [
     translation:
       'Gloria a Ti, oh Allah, y toda alabanza es Tuya. Bendito es Tu nombre, exaltada Tu majestad. No hay dios sino Tú.',
     audioKey: 'dua_opening',
-    audioUrls: salafiAudio(2),
+    audioUrls: dhikrAudio(28),
     repeat: 1,
     onlyFirstRakaa: true,
   },
@@ -136,7 +136,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Allāhu Akbar',
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
-    audioUrls: salafiAudio(1),
+    audioUrls: null,
     repeat: 1,
   },
   {
@@ -150,7 +150,7 @@ export const PRAYER_STEPS = [
     transliteration: "Subhāna rabbiyal 'azīm",
     translation: 'Gloria a mi Señor, el Grandioso',
     audioKey: 'ruku_tasbih',
-    audioUrls: salafiAudio(6),
+    audioUrls: dhikrAudio(33),
     repeat: 3,
   },
   {
@@ -164,7 +164,7 @@ export const PRAYER_STEPS = [
     transliteration: "Sami'a Llāhu liman hamidah",
     translation: 'Allah escucha a quien Le alaba',
     audioKey: 'tasmi',
-    audioUrls: salafiAudio(7),
+    audioUrls: dhikrAudio(38),
     repeat: 1,
   },
   {
@@ -178,7 +178,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Rabbanā wa laka l-hamd',
     translation: 'Señor nuestro, a Ti sea toda la alabanza',
     audioKey: 'tahmid',
-    audioUrls: salafiAudio(8),
+    audioUrls: dhikrAudio(39),
     repeat: 1,
   },
   {
@@ -192,7 +192,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Allāhu Akbar',
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
-    audioUrls: salafiAudio(1),
+    audioUrls: null,
     repeat: 1,
   },
   {
@@ -206,7 +206,7 @@ export const PRAYER_STEPS = [
     transliteration: "Subhāna rabbiyal a'lā",
     translation: 'Gloria a mi Señor, el Altísimo',
     audioKey: 'sujud_tasbih',
-    audioUrls: salafiAudio(9),
+    audioUrls: dhikrAudio(41),
     repeat: 3,
   },
   {
@@ -220,7 +220,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Rabbi ghfir lī',
     translation: 'Señor mío, perdóname',
     audioKey: 'jalsah',
-    audioUrls: salafiAudio(10),
+    audioUrls: dhikrAudio(48),
     repeat: 1,
   },
   {
@@ -234,7 +234,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Allāhu Akbar',
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
-    audioUrls: salafiAudio(1),
+    audioUrls: null,
     repeat: 1,
   },
   {
@@ -248,7 +248,7 @@ export const PRAYER_STEPS = [
     transliteration: "Subhāna rabbiyal a'lā",
     translation: 'Gloria a mi Señor, el Altísimo',
     audioKey: 'sujud_tasbih',
-    audioUrls: salafiAudio(9),
+    audioUrls: dhikrAudio(41),
     repeat: 3,
   },
   {
@@ -265,7 +265,7 @@ export const PRAYER_STEPS = [
     translation:
       'Todos los saludos, oraciones y palabras buenas son para Allah. La paz sea contigo, oh Profeta, y la misericordia y bendiciones de Allah. La paz sea con nosotros y con los siervos virtuosos de Allah. Atestiguo que no hay dios sino Allah, y atestiguo que Muhammad es Su siervo y mensajero.',
     audioKey: 'tashahhud',
-    audioUrls: salafiAudio(11),
+    audioUrls: dhikrAudio(52),
     repeat: 1,
     afterRakaa: 2,
     notLastRakaa: true,
@@ -282,7 +282,7 @@ export const PRAYER_STEPS = [
     transliteration: 'At-tahiyyātu lillāhi... (igual que el tashahhud intermedio)',
     translation: 'Igual que el tashahhud intermedio',
     audioKey: 'tashahhud',
-    audioUrls: salafiAudio(11),
+    audioUrls: dhikrAudio(52),
     repeat: 1,
     lastRakaaOnly: true,
   },
@@ -300,7 +300,7 @@ export const PRAYER_STEPS = [
     translation:
       'Oh Allah, envía bendiciones sobre Muhammad y sobre la familia de Muhammad, como enviaste bendiciones sobre Ibrahim y la familia de Ibrahim. Ciertamente Tú eres Digno de alabanza, Glorioso.',
     audioKey: 'darood',
-    audioUrls: salafiAudio(12),
+    audioUrls: dhikrAudio(53),
     repeat: 1,
     lastRakaaOnly: true,
   },
@@ -318,7 +318,7 @@ export const PRAYER_STEPS = [
     translation:
       'Oh Allah, me he hecho a mí mismo mucha injusticia y nadie perdona los pecados sino Tú, así que concédeme Tu perdón y ten misericordia de mí. Ciertamente Tú eres el Perdonador, el Misericordioso.',
     audioKey: 'dua_final',
-    audioUrls: salafiAudio(13),
+    audioUrls: dhikrAudio(57),
     repeat: 1,
     lastRakaaOnly: true,
   },
@@ -333,7 +333,7 @@ export const PRAYER_STEPS = [
     transliteration: 'As-salāmu \'alaykum wa rahmatullāh',
     translation: 'La paz y misericordia de Allah sean con vosotros',
     audioKey: 'salam',
-    audioUrls: salafiAudio(14),
+    audioUrls: null,
     repeat: 2,
   },
 ]
