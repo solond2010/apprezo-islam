@@ -26,9 +26,35 @@ const PRAYER_LABELS = {
 
 function formatTime(t) {
   if (!t) return '--:--'
-  const hours = t.hours?.toString().padStart(2, '0') || t
-  const minutes = t.minutes?.toString().padStart(2, '0') || '00'
+  if (typeof t === 'string') return t.slice(0, 5)
+  const hours = t.hours?.toString().padStart(2, '0') || '--'
+  const minutes = t.minutes?.toString().padStart(2, '0') || '--'
   return `${hours}:${minutes}`
+}
+
+function getNextPrayerInfo(timings) {
+  const now = new Date()
+  const currentMin = now.getHours() * 60 + now.getMinutes()
+  const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
+
+  for (const name of prayers) {
+    const [h, m] = timings[name].split(':').map(Number)
+    if (h * 60 + m > currentMin) {
+      return { name, time: timings[name], isTomorrow: false }
+    }
+  }
+  return { name: 'Fajr', time: timings['Fajr'], isTomorrow: true }
+}
+
+function calcTimeLeft(targetTime, isTomorrow) {
+  const now = new Date()
+  const [h, m] = targetTime.split(':').map(Number)
+  const target = new Date(now)
+  target.setHours(h, m, 0, 0)
+  if (isTomorrow) target.setDate(target.getDate() + 1)
+  const diff = Math.max(0, target - now)
+  const s = Math.floor(diff / 1000)
+  return `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 }
 
 function getLocation() {
@@ -81,7 +107,7 @@ function HeroSection() {
   )
 }
 
-function PrayerTimesCard({ timings, locationName }) {
+function PrayerTimesCard({ timings, locationName, nextPrayer, timeLeft }) {
   const prayerNames = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
 
   return (
@@ -114,6 +140,16 @@ function PrayerTimesCard({ timings, locationName }) {
         <Compass size={12} className="text-gray-400" />
         <span className="text-xs text-gray-400">Horarios calculados para hoy</span>
       </div>
+
+      {nextPrayer && (
+        <div className="mt-5 -mx-5 -mb-5 bg-emerald-600 rounded-b-2xl px-5 py-4 text-white">
+          <div className="text-xs text-emerald-100/80 mb-0.5">Próximo rezo</div>
+          <div className="text-lg font-bold">{nextPrayer.name}</div>
+          <div className="text-2xl font-mono font-bold mt-1 tabular-nums tracking-wider">
+            {timeLeft}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -140,6 +176,8 @@ export default function ElRezo() {
   const [locationName, setLocationName] = useState('Obteniendo ubicación...')
   const [loading, setLoading] = useState(true)
   const [showGuide, setShowGuide] = useState(false)
+  const [nextPrayer, setNextPrayer] = useState(null)
+  const [timeLeft, setTimeLeft] = useState('--:--:--')
 
   useEffect(() => {
     let cancelled = false
@@ -170,6 +208,18 @@ export default function ElRezo() {
     return () => { cancelled = true }
   }, [])
 
+  useEffect(() => {
+    if (!timings) return
+    function tick() {
+      const info = getNextPrayerInfo(timings)
+      setNextPrayer(info)
+      setTimeLeft(calcTimeLeft(info.time, info.isTomorrow))
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [timings])
+
   if (showGuide) {
     return <PrayerGuide onBack={() => setShowGuide(false)} />
   }
@@ -179,7 +229,7 @@ export default function ElRezo() {
       <HeroSection />
 
       {loading ? <LoadingSkeleton /> : (
-        <PrayerTimesCard timings={timings} locationName={locationName} />
+        <PrayerTimesCard timings={timings} locationName={locationName} nextPrayer={nextPrayer} timeLeft={timeLeft} />
       )}
 
       <button
