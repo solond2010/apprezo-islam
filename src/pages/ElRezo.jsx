@@ -317,7 +317,8 @@ export default function ElRezo() {
       if (cancelled) return
       setUserCoords({ lat, lon })
       try {
-        const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`)
+        // method=3 → Muslim World League (MWL): Fajr 18°, Isha 17° — estándar Europa/España
+        const res = await fetch(`https://api.aladhan.com/v1/timings/today?latitude=${lat}&longitude=${lon}&method=3`)
         const data = await res.json()
         if (cancelled) return
         setTimings(data.data.timings)
