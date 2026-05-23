@@ -19,6 +19,9 @@ function QiblaCompass({ latitude, longitude }) {
   const [permissionState, setPermissionState] = useState('idle')
   const [deviceHeading, setDeviceHeading] = useState(null)
   const listenerRef = useRef(null)
+  const smoothedHeading = useRef(0)
+  const lastUpdate = useRef(0)
+  const SMOOTHING = 0.15
 
   const qiblaAngle = calculateQiblaAngle(latitude, longitude)
   const needleRotation = deviceHeading !== null ? qiblaAngle - deviceHeading : qiblaAngle
@@ -29,15 +32,23 @@ function QiblaCompass({ latitude, longitude }) {
 
   function startListening() {
     const handler = (e) => {
-      let heading = null
+      const now = Date.now()
+      if (now - lastUpdate.current < 50) return
+      lastUpdate.current = now
 
+      let raw = 0
       if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
-        heading = e.webkitCompassHeading
+        raw = e.webkitCompassHeading
       } else if (e.alpha !== null) {
-        heading = 360 - e.alpha
+        raw = 360 - e.alpha
       }
 
-      if (heading !== null) setDeviceHeading(heading)
+      let delta = raw - smoothedHeading.current
+      if (delta > 180) delta -= 360
+      if (delta < -180) delta += 360
+      smoothedHeading.current = (smoothedHeading.current + delta * SMOOTHING + 360) % 360
+
+      setDeviceHeading(smoothedHeading.current)
     }
 
     window.addEventListener('deviceorientation', handler, true)
@@ -180,8 +191,9 @@ function QiblaCompass({ latitude, longitude }) {
           <g
             style={{
               transform: `rotate(${showStatic ? qiblaAngle : needleRotation}deg)`,
-              transformOrigin: '100px 100px',
-              transition: 'transform 300ms ease',
+              transformOrigin: 'center',
+              transformBox: 'fill-box',
+              transition: 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             }}
           >
             <polygon points="100,24 94,96 106,96" fill="#10b981" />
