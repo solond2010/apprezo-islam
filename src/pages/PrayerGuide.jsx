@@ -1,38 +1,182 @@
-import { useState } from 'react'
-import { ChevronLeft, User } from 'lucide-react'
-import { useSettings } from '../context/SettingsContext'
-import { pasosRezo } from './rezoData'
-import KaraokePlayer from '../components/KaraokePlayer'
+import { useState, useRef, useEffect, useMemo } from 'react'
+import { ChevronLeft, ChevronRight, Play, StopCircle, CheckCircle, RotateCcw } from 'lucide-react'
+import { PRAYER_RAKAATS, getStepsForRakaa } from '../data/prayerData'
 
-const prayers = [
-  { id: 'Fajr', label: 'Fajr', time: 'Amanecer' },
-  { id: 'Dhuhr', label: 'Dhuhr', time: 'Mediodía' },
-  { id: 'Asr', label: 'Asr', time: 'Tarde' },
-  { id: 'Maghrib', label: 'Maghrib', time: 'Atardecer' },
-  { id: 'Isha', label: 'Isha', time: 'Noche' },
+const PRAYERS = [
+  { id: 'fajr', label: 'Fajr', desc: '2 rakaas' },
+  { id: 'dhuhr', label: 'Dhuhr', desc: '4 rakaas' },
+  { id: 'asr', label: 'Asr', desc: '4 rakaas' },
+  { id: 'maghrib', label: 'Maghrib', desc: '3 rakaas' },
+  { id: 'isha', label: 'Isha', desc: '4 rakaas' },
 ]
 
-function PostureIcon({ paso }) {
-  const isSuyud = paso.titulo.toLowerCase().includes('sujud')
-  const isRuku = paso.titulo.toLowerCase().includes('ruku')
-  const rotate = isSuyud ? '180' : isRuku ? '90' : ''
+const POSITION_ICONS = {
+  standing: (
+    <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="5" r="3" />
+      <line x1="12" y1="8" x2="12" y2="17" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <line x1="12" y1="17" x2="8" y2="22" />
+      <line x1="12" y1="17" x2="16" y2="22" />
+    </svg>
+  ),
+  bowing: (
+    <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="14" cy="5" r="3" />
+      <path d="M14 8 Q8 12 5 18" />
+      <line x1="5" y1="18" x2="3" y2="22" />
+      <line x1="9" y1="13" x2="6" y2="17" />
+      <line x1="12" y1="11" x2="9" y2="16" />
+    </svg>
+  ),
+  prostrating: (
+    <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="4" r="2.8" />
+      <path d="M6 15 Q12 8 18 15" />
+      <rect x="7" y="15" width="10" height="2.5" rx="1" />
+      <line x1="7" y1="17.5" x2="5" y2="21" />
+      <line x1="17" y1="17.5" x2="19" y2="21" />
+    </svg>
+  ),
+  sitting: (
+    <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="5" r="3" />
+      <line x1="12" y1="8" x2="12" y2="14" />
+      <line x1="12" y1="14" x2="7" y2="20" />
+      <line x1="12" y1="14" x2="17" y2="20" />
+      <line x1="6" y1="14" x2="18" y2="14" />
+    </svg>
+  ),
+}
 
+function PostureIcon({ position }) {
   return (
-    <div
-      className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-2 transition-transform shrink-0"
-      style={rotate ? { transform: `rotateX(${rotate}deg)` } : {}}
-    >
-      <User size={20} className="text-emerald-600" />
+    <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+      {POSITION_ICONS[position] || POSITION_ICONS.standing}
     </div>
   )
 }
 
 export default function PrayerGuide({ onBack }) {
-  const [selectedPrayer, setSelectedPrayer] = useState('Fajr')
-  const { fontSize } = useSettings()
+  const [selectedPrayer, setSelectedPrayer] = useState('fajr')
+  const [currentRakaa, setCurrentRakaa] = useState(1)
+  const [currentStep, setCurrentStep] = useState(0)
+  const [completed, setCompleted] = useState(false)
+  const [playingAudioKey, setPlayingAudioKey] = useState(null)
+
+  const audioRef = useRef(null)
+
+  const totalRakaas = PRAYER_RAKAATS[selectedPrayer]
+  const rakaaSteps = useMemo(
+    () => getStepsForRakaa(currentRakaa, totalRakaas),
+    [currentRakaa, totalRakaas]
+  )
+  const step = rakaaSteps[currentStep]
+  const isLastStep = currentStep === rakaaSteps.length - 1
+  const isLastRakaa = currentRakaa === totalRakaas
+
+  function stopAudio() {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      audioRef.current = null
+    }
+    setPlayingAudioKey(null)
+  }
+
+  // Reproduce una lista de URLs en secuencia (ayah a ayah)
+  function playSequence(urls, index, sessionKey) {
+    if (index >= urls.length) {
+      setPlayingAudioKey(null)
+      audioRef.current = null
+      return
+    }
+    const audio = new Audio(urls[index])
+    audioRef.current = audio
+    audio.play()
+      .then(() => setPlayingAudioKey(sessionKey))
+      .catch((err) => {
+        console.warn('Audio no disponible:', urls[index], err)
+        setPlayingAudioKey(null)
+      })
+    audio.addEventListener('ended', () => {
+      audioRef.current = null
+      playSequence(urls, index + 1, sessionKey)
+    })
+  }
+
+  function handlePlayAudio(audioUrls) {
+    if (!audioUrls || audioUrls.length === 0) return
+    const sessionKey = audioUrls[0] // identificador único para este conjunto
+
+    if (playingAudioKey === sessionKey) {
+      stopAudio()
+      return
+    }
+
+    stopAudio()
+    playSequence(audioUrls, 0, sessionKey)
+  }
+
+  useEffect(() => {
+    return () => {
+      stopAudio()
+    }
+  }, [])
+
+  useEffect(() => {
+    stopAudio()
+  }, [selectedPrayer, currentRakaa, currentStep])
+
+  function handlePrayerChange(id) {
+    setSelectedPrayer(id)
+    setCurrentRakaa(1)
+    setCurrentStep(0)
+    setCompleted(false)
+  }
+
+  function handleNext() {
+    if (completed) return
+
+    setCurrentStep((prev) => {
+      const steps = getStepsForRakaa(currentRakaa, totalRakaas)
+      if (prev < steps.length - 1) {
+        return prev + 1
+      }
+      return prev
+    })
+
+    if (isLastStep) {
+      if (!isLastRakaa) {
+        setCurrentRakaa((r) => r + 1)
+        setCurrentStep(0)
+      } else {
+        setCompleted(true)
+      }
+    }
+  }
+
+  function handlePrevious() {
+    if (completed) return
+
+    if (currentStep > 0) {
+      setCurrentStep((s) => s - 1)
+    } else if (currentRakaa > 1) {
+      const prevRakaa = currentRakaa - 1
+      const prevSteps = getStepsForRakaa(prevRakaa, totalRakaas)
+      setCurrentRakaa(prevRakaa)
+      setCurrentStep(prevSteps.length - 1)
+    }
+  }
+
+  function handleRestart() {
+    setCurrentRakaa(1)
+    setCurrentStep(0)
+    setCompleted(false)
+  }
 
   return (
-    <div className="pt-4 pb-4">
+    <div className="pt-4 pb-8">
       <button
         onClick={onBack}
         className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 mb-4 transition-colors"
@@ -41,16 +185,18 @@ export default function PrayerGuide({ onBack }) {
         Volver al inicio
       </button>
 
-      <h2 className="text-lg font-semibold text-gray-900 mb-3">Selecciona un Rezo</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        Guía Paso a Paso
+      </h2>
 
-      <div className="grid grid-cols-5 gap-2 mb-8">
-        {prayers.map((p) => {
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+        {PRAYERS.map((p) => {
           const active = selectedPrayer === p.id
           return (
             <button
               key={p.id}
-              onClick={() => setSelectedPrayer(p.id)}
-              className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all duration-200 active:scale-90 ${
+              onClick={() => handlePrayerChange(p.id)}
+              className={`shrink-0 flex flex-col items-center gap-0.5 py-2.5 px-4 rounded-xl transition-all duration-200 active:scale-90 ${
                 active
                   ? 'bg-emerald-600 text-white shadow-sm'
                   : 'bg-white text-gray-600 border border-gray-200'
@@ -59,40 +205,179 @@ export default function PrayerGuide({ onBack }) {
               <span className={`text-sm font-semibold ${active ? 'text-white' : 'text-gray-800'}`}>
                 {p.label}
               </span>
-              <span className="text-[9px] leading-tight opacity-70">{p.time}</span>
+              <span className="text-[9px] leading-tight opacity-70">{p.desc}</span>
             </button>
           )
         })}
       </div>
 
-      <div className="flex flex-col gap-6 pb-8">
-        {pasosRezo.map((paso) => (
-          <div
-            key={paso.id}
-            id={`paso-${paso.id}`}
-            className="bg-white rounded-2xl shadow-sm border border-gray-200 px-5 py-5"
-          >
-            <div className="text-center mb-3">
-              <PostureIcon paso={paso} />
-              <h3 className="text-sm font-semibold text-emerald-600">{paso.titulo}</h3>
-              <p className="text-xs text-gray-500 leading-relaxed mt-1">{paso.accion}</p>
-            </div>
-
-            <div className="border-t border-gray-100 pt-3">
-              <KaraokePlayer
-                segments={paso.segments}
-                audioUrl={paso.audioUrl}
-                fontSize={fontSize}
-                pasoId={paso.id}
-              />
-            </div>
-
-            <p className="text-xs text-gray-400 text-center leading-relaxed mt-3">
-              {paso.traduccion}
-            </p>
+      {completed ? (
+        <div className="bg-emerald-50 rounded-2xl p-8 text-center border border-emerald-100">
+          <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle size={36} className="text-emerald-600" />
           </div>
-        ))}
-      </div>
+          <h3 className="text-xl font-bold text-gray-900">¡Rezo completado!</h3>
+          <p className="text-gray-600 mt-2 leading-relaxed">
+            Que Allah acepte tu oración de{' '}
+            <span className="font-semibold text-emerald-600">
+              {PRAYERS.find((p) => p.id === selectedPrayer)?.label}
+            </span>
+            .
+          </p>
+          <p className="text-sm text-gray-500 mt-1">Taqabbal Allahu minna wa minkum</p>
+          <div className="flex gap-3 justify-center mt-6">
+            <button
+              onClick={onBack}
+              className="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+            >
+              Volver al inicio
+            </button>
+            <button
+              onClick={handleRestart}
+              className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors flex items-center gap-1.5"
+            >
+              <RotateCcw size={14} />
+              Repetir
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {totalRakaas > 1 && (
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-sm font-medium text-gray-700">
+                Rakaa {currentRakaa} de {totalRakaas}
+              </span>
+              <div className="flex gap-1.5">
+                {Array.from({ length: totalRakaas }, (_, i) => (
+                  <div
+                    key={i}
+                    className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                      i + 1 === currentRakaa ? 'bg-emerald-600' : 'bg-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 px-5 py-6">
+              <div className="flex items-start gap-4 mb-5">
+                <PostureIcon position={step.position} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-medium text-gray-400">
+                      Paso {currentStep + 1}
+                    </span>
+                    {step.repeat > 1 && (
+                      <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md">
+                        × {step.repeat}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-900 mt-0.5">
+                    {step.name}
+                  </h3>
+                  <p className="text-sm text-emerald-600 font-arabic" dir="rtl">
+                    {step.nameAr}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 leading-relaxed mb-1">
+                {step.description}
+              </p>
+              <p className="text-xs text-gray-400 leading-relaxed mb-4">
+                {step.instruction}
+              </p>
+
+              {step.note && (
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 mb-4">
+                  <p className="text-xs text-amber-700 leading-relaxed">
+                    💡 {step.note}
+                  </p>
+                </div>
+              )}
+
+              {step.arabic && (
+                <div className="border-t border-gray-100 pt-4 space-y-3">
+                  <p
+                    className="text-2xl leading-relaxed text-emerald-700 font-arabic text-center"
+                    dir="rtl"
+                  >
+                    {step.arabic}
+                  </p>
+                  {step.transliteration && (
+                    <p className="text-sm text-emerald-500 italic text-center">
+                      {step.transliteration}
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-500 text-center leading-relaxed">
+                    {step.translation}
+                  </p>
+                </div>
+              )}
+
+              {step.audioUrls?.length > 0 && (
+                <button
+                  onClick={() => handlePlayAudio(step.audioUrls)}
+                  className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 active:scale-95 shadow-sm ${
+                    playingAudioKey === step.audioUrls[0]
+                      ? 'bg-rose-500 hover:bg-rose-600 text-white'
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  }`}
+                >
+                  {playingAudioKey === step.audioUrls[0] ? (
+                    <>
+                      <StopCircle size={16} />
+                      Detener
+                    </>
+                  ) : (
+                    <>
+                      <Play size={16} />
+                      Escuchar recitación
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-3 mt-5">
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 0 && currentRakaa === 1}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-sm font-medium transition-all duration-200 active:scale-95 ${
+                currentStep === 0 && currentRakaa === 1
+                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                  : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <ChevronLeft size={16} />
+              Anterior
+            </button>
+
+            {isLastStep && isLastRakaa ? (
+              <button
+                onClick={handleNext}
+                className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-all duration-200 active:scale-95 shadow-sm"
+              >
+                <CheckCircle size={16} />
+                Completar oración
+              </button>
+            ) : (
+              <button
+                onClick={handleNext}
+                className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-all duration-200 active:scale-95 shadow-sm"
+              >
+                Siguiente
+                <ChevronRight size={16} />
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   )
 }
