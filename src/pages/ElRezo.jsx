@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { MapPin, Sunrise, Sun, CloudSun, Sunset, Moon, ArrowRight, Clock } from 'lucide-react'
 import { useSettings } from '../context/SettingsContext'
 import PrayerGuide from './PrayerGuide'
+import QiblaCard from '../components/QiblaCard'
 
 const FALLBACK_COORDS = { lat: 40.4168, lon: -3.7038 }
 
@@ -179,12 +180,14 @@ export default function ElRezo() {
   const [showGuide, setShowGuide] = useState(false)
   const [nextPrayer, setNextPrayer] = useState(null)
   const [timeLeft, setTimeLeft] = useState('--:--:--')
+  const [userCoords, setUserCoords] = useState(null)
 
   useEffect(() => {
     let cancelled = false
     async function fetchTimings() {
       const { lat, lon } = await getLocation()
       if (cancelled) return
+      if (!cancelled) setUserCoords({ lat, lon })
 
       try {
         const res = await fetch(
@@ -230,7 +233,10 @@ export default function ElRezo() {
       <HeroSection />
 
       {loading ? <LoadingSkeleton /> : (
-        <PrayerTimesCard timings={timings} locationName={locationName} nextPrayer={nextPrayer} timeLeft={timeLeft} />
+        <>
+          <PrayerTimesCard timings={timings} locationName={locationName} nextPrayer={nextPrayer} timeLeft={timeLeft} />
+          {userCoords && <QiblaCard latitude={userCoords.lat} longitude={userCoords.lon} />}
+        </>
       )}
 
       <button
