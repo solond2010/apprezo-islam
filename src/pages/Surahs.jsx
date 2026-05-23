@@ -406,46 +406,82 @@ function SurahList({ onSelect, darkMode }) {
       transition={{ duration: 0.22, ease: 'easeOut' }}
       className="pt-4 pb-2"
     >
-      <h2 className={`text-2xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-slate-800'}`}>
-        Surahs
-      </h2>
+      <div className="mb-5 px-1">
+        <p className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          Sagrado Corán
+        </p>
+        <h1 className={`text-2xl font-black mt-0.5 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+          Surahs
+        </h1>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="relative overflow-hidden rounded-3xl mb-5 shadow-lg"
+        style={{
+          background: darkMode
+            ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
+            : 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)',
+        }}
+      >
+        <div className="relative px-5 py-5">
+          <div
+            className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-30"
+            style={{ background: 'radial-gradient(circle, white 0%, transparent 70%)' }}
+          />
+          <p className="text-[10px] font-bold text-white/80 uppercase tracking-widest mb-1">
+            Última lectura
+          </p>
+          <h3 className="text-xl font-black text-white">Al-Fatiha</h3>
+          <p className="text-xs text-white/80 mt-1">La Apertura · 7 ayahs</p>
+        </div>
+      </motion.div>
+
       <div className="flex flex-col gap-3">
-        {surahs.map((s) => (
-          <button
+        {surahs.map((s, i) => (
+          <motion.button
             key={s.id}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.03 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => onSelect(s)}
-            className={`w-full flex items-center justify-between px-4 py-4 rounded-xl shadow-sm border text-left active:scale-[0.98] transition-all duration-150 ${
+            className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl shadow-sm border text-left transition-all duration-150 ${
               darkMode
-                ? 'bg-[#1e1e1e] border-[#2a2a2a] active:bg-[#2a2a2a]'
-                : 'bg-[#FFFBF2] border-[#EDE3D3] active:bg-[#F5ECD8]'
+                ? 'bg-[#1e1e1e]/70 backdrop-blur-md border-[#2a2a2a] active:bg-[#2a2a2a]'
+                : 'bg-white/70 backdrop-blur-md border-white/60 active:bg-white/90'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <span className={`text-xs font-mono tabular-nums w-5 shrink-0 ${
-                darkMode ? 'text-slate-500' : 'text-slate-400'
-              }`}>
-                {s.id}
-              </span>
-              <div>
-                <p className={`text-base font-semibold ${darkMode ? 'text-white' : 'text-slate-800'}`}>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <span className="text-xs font-black text-white tabular-nums">
+                  {s.id}
+                </span>
+              </div>
+              <div className="min-w-0">
+                <p className={`text-base font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                   {s.name}
                 </p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className={`text-lg ${darkMode ? 'text-slate-300' : 'text-slate-700'}`} dir="rtl">
-                    {s.nameAr}
-                  </span>
-                  <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>—</span>
-                  <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                     {s.meaning}
                   </span>
+                  <span className={`text-[10px] ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>•</span>
+                  <span className={`text-[10px] font-medium ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                    {s.verses.length} ayahs
+                  </span>
                 </div>
-                <p className={`text-xs mt-1 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  {s.verses.length} ayahs
-                </p>
               </div>
             </div>
-            <ChevronRight size={20} className={darkMode ? 'text-slate-500' : 'text-slate-400'} />
-          </button>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className={`text-lg ${darkMode ? 'text-gray-300' : 'text-amber-700'}`} dir="rtl">
+                {s.nameAr}
+              </span>
+              <ChevronRight size={18} className={darkMode ? 'text-gray-500' : 'text-gray-400'} />
+            </div>
+          </motion.button>
         ))}
       </div>
     </motion.div>

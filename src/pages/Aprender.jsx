@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X, Droplets, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { Search, X, Droplets, ShieldCheck, AlertTriangle, ChevronRight } from 'lucide-react'
 
 const topics = [
   {
@@ -63,22 +63,31 @@ const topics = [
   },
 ]
 
-function TopicCard({ topic, onOpen }) {
+const TOPIC_COLORS = [
+  { bg: 'bg-blue-50', text: 'text-blue-500' },
+  { bg: 'bg-emerald-50', text: 'text-emerald-500' },
+  { bg: 'bg-rose-50', text: 'text-rose-500' },
+  { bg: 'bg-violet-50', text: 'text-violet-500' },
+]
+
+function TopicCard({ topic, onOpen, colorIdx = 0 }) {
   const Icon = topic.icon
+  const colors = TOPIC_COLORS[colorIdx % TOPIC_COLORS.length]
   return (
     <motion.button
       whileTap={{ scale: 0.98 }}
       onClick={() => onOpen(topic)}
-      className="w-full bg-[#FFFBF2] rounded-xl shadow-sm border border-[#EDE3D3] p-4 text-left active:bg-[#F5ECD8] transition-colors"
+      className="w-full bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/60 p-4 text-left active:bg-white/90 transition-colors"
     >
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center shrink-0 mt-0.5">
-          <Icon size={20} className="text-emerald-600" />
+        <div className={`w-11 h-11 rounded-2xl ${colors.bg} flex items-center justify-center shrink-0 mt-0.5`}>
+          <Icon size={20} className={colors.text} strokeWidth={2.2} />
         </div>
-        <div className="min-w-0">
-          <h3 className="text-base font-semibold text-slate-800">{topic.title}</h3>
-          <p className="text-sm text-slate-500 mt-0.5">{topic.subtitle}</p>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base font-bold text-gray-800">{topic.title}</h3>
+          <p className="text-xs text-gray-500 mt-0.5">{topic.subtitle}</p>
         </div>
+        <ChevronRight size={18} className="text-gray-300 mt-2" />
       </div>
     </motion.button>
   )
@@ -101,22 +110,22 @@ function Modal({ topic, onClose }) {
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="bg-[#FFFBF2] w-full max-w-lg max-h-[85vh] rounded-t-2xl sm:rounded-2xl flex flex-col overflow-hidden"
+        className="bg-white w-full max-w-lg max-h-[85vh] rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden shadow-2xl"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100 shrink-0">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-              <topic.icon size={18} className="text-emerald-600" />
+            <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0">
+              <topic.icon size={18} className="text-amber-600" strokeWidth={2.2} />
             </div>
-            <h3 className="text-base font-semibold text-slate-800 truncate">{topic.title}</h3>
+            <h3 className="text-base font-bold text-gray-800 truncate">{topic.title}</h3>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 active:bg-slate-200 transition-colors"
+            className="w-9 h-9 rounded-2xl bg-gray-100 flex items-center justify-center shrink-0 active:scale-90 transition-transform"
           >
-            <X size={16} className="text-slate-500" />
+            <X size={16} className="text-gray-500" />
           </button>
         </div>
         <div className="overflow-y-auto px-5 py-4">
@@ -163,27 +172,32 @@ export default function Aprender() {
       transition={{ duration: 0.25, ease: 'easeOut' }}
       className="pt-4 pb-2"
     >
-      <h2 className="text-2xl font-semibold text-slate-800 mb-4">Aprender</h2>
+      <div className="mb-5 px-1">
+        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+          Conocimiento
+        </p>
+        <h1 className="text-2xl font-black text-gray-800 mt-0.5">Aprender</h1>
+      </div>
 
-      <div className="relative mb-4">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      <div className="relative mb-5">
+        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
           placeholder="Buscar temas..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 bg-[#FFFBF2] border border-[#EDE3D3] rounded-xl text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-colors"
+          className="w-full pl-10 pr-4 py-3 bg-white/70 backdrop-blur-md border border-white/60 rounded-2xl text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-300/40 transition-all shadow-sm"
         />
       </div>
 
       <div className="flex flex-col gap-3">
         {filtered.length === 0 ? (
-          <p className="text-sm text-slate-400 text-center py-8">
+          <p className="text-sm text-gray-400 text-center py-8">
             No se encontraron temas para "{search}"
           </p>
         ) : (
-          filtered.map((t) => (
-            <TopicCard key={t.id} topic={t} onOpen={setSelectedTopic} />
+          filtered.map((t, i) => (
+            <TopicCard key={t.id} topic={t} onOpen={setSelectedTopic} colorIdx={i} />
           ))
         )}
       </div>

@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Terracotta palette (replaces all emerald-* utilities globally) ── */
-  --color-emerald-50:  #FFF8F0;
-  --color-emerald-100: #FDECD5;
-  --color-emerald-200: #FAD9AC;
-  --color-emerald-300: #F0BF87;
-  --color-emerald-400: #C98B55;
-  --color-emerald-500: #B87A45;
-  --color-emerald-600: #A06A38;
-  --color-emerald-700: #8B5A2B;
-  --color-emerald-800: #7A4E24;
-  --color-emerald-900: #4A3C2D;
+  /* ── Warm amber palette ── */
+  --color-emerald-50:  #FEF3C7;
+  --color-emerald-100: #FDE68A;
+  --color-emerald-200: #FCD34D;
+  --color-emerald-300: #FBBF24;
+  --color-emerald-400: #F59E0B;
+  --color-emerald-500: #EA8A0B;
+  --color-emerald-600: #D97706;
+  --color-emerald-700: #B45309;
+  --color-emerald-800: #92400E;
+  --color-emerald-900: #78350F;
 
-  /* ── Warm beige background ── */
-  --color-gray-50: #F7F1E6;
+  /* ── Warm background ── */
+  --color-gray-50: #FFF4E0;
 }
 
 * {
@@ -32,8 +32,8 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #F7F1E6;
-  color: #4A3C2D;
+  background-color: #FFF4E0;
+  color: #1F2937;
 }
 
 html.dark body {

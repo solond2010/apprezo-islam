@@ -89,23 +89,30 @@ function QiblaCompass({ latitude, longitude }) {
 
   if (permissionState === 'idle' || permissionState === 'requesting') {
     return (
-      <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] shadow-sm p-5 flex flex-col items-center">
-        <div className="relative w-52 h-52">
+      <div className="bg-white/70 backdrop-blur-md rounded-3xl border border-white/60 shadow-lg p-6 flex flex-col items-center">
+        <div className="relative w-56 h-56">
           <svg viewBox="0 0 200 200" className="w-full h-full">
-            <circle cx="100" cy="100" r="92" fill="none" stroke="#e5e7eb" strokeWidth="1.5" />
-            <circle cx="100" cy="100" r="86" fill="none" stroke="#f3f4f6" strokeWidth="0.5" />
-            <text x="100" y="22" textAnchor="middle" fill="#9ca3af" fontSize="11" fontWeight="600" fontFamily="system-ui">N</text>
-            <text x="178" y="102" textAnchor="middle" fill="#9ca3af" fontSize="11" fontWeight="600" fontFamily="system-ui">E</text>
-            <text x="100" y="184" textAnchor="middle" fill="#9ca3af" fontSize="11" fontWeight="600" fontFamily="system-ui">S</text>
-            <text x="22" y="102" textAnchor="middle" fill="#9ca3af" fontSize="11" fontWeight="600" fontFamily="system-ui">O</text>
+            <defs>
+              <radialGradient id="comp-grad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#FEF3C7" />
+                <stop offset="100%" stopColor="white" />
+              </radialGradient>
+            </defs>
+            <circle cx="100" cy="100" r="92" fill="url(#comp-grad)" stroke="#FCD34D" strokeWidth="1.5" />
+            <circle cx="100" cy="100" r="80" fill="none" stroke="#FDE68A" strokeWidth="0.5" />
+            <text x="100" y="22" textAnchor="middle" fill="#D97706" fontSize="13" fontWeight="800" fontFamily="system-ui">N</text>
+            <text x="178" y="105" textAnchor="middle" fill="#9ca3af" fontSize="12" fontWeight="600" fontFamily="system-ui">E</text>
+            <text x="100" y="186" textAnchor="middle" fill="#9ca3af" fontSize="12" fontWeight="600" fontFamily="system-ui">S</text>
+            <text x="22" y="105" textAnchor="middle" fill="#9ca3af" fontSize="12" fontWeight="600" fontFamily="system-ui">O</text>
+            <circle cx="100" cy="100" r="6" fill="#F59E0B" />
           </svg>
         </div>
         <button
           onClick={requestSensor}
           disabled={permissionState === 'requesting'}
-          className="mt-6 w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 disabled:opacity-60 text-white rounded-2xl py-4 font-semibold text-sm transition-all"
+          className="mt-6 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-95 disabled:opacity-60 text-white rounded-2xl py-4 font-bold text-sm transition-all shadow-lg shadow-amber-500/30"
         >
-          {permissionState === 'requesting' ? '⌛ Activando...' : '🧭 Activar brújula'}
+          {permissionState === 'requesting' ? 'Activando...' : 'Activar brújula'}
         </button>
       </div>
     )
@@ -136,24 +143,31 @@ function QiblaCompass({ latitude, longitude }) {
   const showStatic = permissionState === 'unavailable' || deviceHeading === null
 
   return (
-    <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] shadow-sm p-5 flex flex-col items-center">
-      <div className="relative w-52 h-52 flex items-center justify-center">
-        <svg viewBox="0 0 200 200" width="100%" style={{ maxWidth: '220px' }}>
-          <circle cx="100" cy="100" r="90" fill="#f9fafb" stroke="#e5e7eb" strokeWidth="1.5"/>
-          <circle cx="100" cy="100" r="75" fill="white" stroke="#f3f4f6" strokeWidth="0.5"/>
+    <div className="bg-white/70 backdrop-blur-md rounded-3xl border border-white/60 shadow-lg p-6 flex flex-col items-center">
+      <div className="relative w-56 h-56 flex items-center justify-center">
+        <svg viewBox="0 0 200 200" width="100%" style={{ maxWidth: '240px' }}>
+          <defs>
+            <radialGradient id="comp-bg" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#FEF3C7" />
+              <stop offset="100%" stopColor="white" />
+            </radialGradient>
+            <linearGradient id="needle-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#F59E0B" />
+              <stop offset="100%" stopColor="#EA580C" />
+            </linearGradient>
+          </defs>
+          <circle cx="100" cy="100" r="92" fill="url(#comp-bg)" stroke="#FCD34D" strokeWidth="1.5"/>
+          <circle cx="100" cy="100" r="78" fill="white" stroke="#FDE68A" strokeWidth="0.5"/>
 
-          <line x1="100" y1="12" x2="100" y2="24" stroke="#d1d5db" strokeWidth="1.5"/>
-          <line x1="100" y1="176" x2="100" y2="188" stroke="#d1d5db" strokeWidth="1"/>
-          <line x1="12" y1="100" x2="24" y2="100" stroke="#d1d5db" strokeWidth="1"/>
-          <line x1="176" y1="100" x2="188" y2="100" stroke="#d1d5db" strokeWidth="1"/>
+          <line x1="100" y1="14" x2="100" y2="26" stroke="#D97706" strokeWidth="2"/>
+          <line x1="100" y1="174" x2="100" y2="186" stroke="#d1d5db" strokeWidth="1"/>
+          <line x1="14" y1="100" x2="26" y2="100" stroke="#d1d5db" strokeWidth="1"/>
+          <line x1="174" y1="100" x2="186" y2="100" stroke="#d1d5db" strokeWidth="1"/>
 
-          <text x="100" y="11" textAnchor="middle" fontSize="11" fill="#374151" fontWeight="700" fontFamily="system-ui">N</text>
-          <text x="100" y="196" textAnchor="middle" fontSize="10" fill="#9ca3af" fontFamily="system-ui">S</text>
-          <text x="196" y="104" textAnchor="middle" fontSize="10" fill="#9ca3af" fontFamily="system-ui">E</text>
-          <text x="7" y="104" textAnchor="middle" fontSize="10" fill="#9ca3af" fontFamily="system-ui">O</text>
-
-          <polygon points="100,28 95,100 105,100" fill="#9ca3af"/>
-          <polygon points="100,172 95,100 105,100" fill="#e5e7eb"/>
+          <text x="100" y="13" textAnchor="middle" fontSize="13" fill="#D97706" fontWeight="800" fontFamily="system-ui">N</text>
+          <text x="100" y="198" textAnchor="middle" fontSize="11" fill="#9ca3af" fontWeight="600" fontFamily="system-ui">S</text>
+          <text x="196" y="104" textAnchor="middle" fontSize="11" fill="#9ca3af" fontWeight="600" fontFamily="system-ui">E</text>
+          <text x="7" y="104" textAnchor="middle" fontSize="11" fill="#9ca3af" fontWeight="600" fontFamily="system-ui">O</text>
 
           <g
             style={{
@@ -162,30 +176,31 @@ function QiblaCompass({ latitude, longitude }) {
               transition: 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             }}
           >
-            <polygon points="100,32 94,96 106,96" fill="#10b981"/>
-            <rect x="93" y="22" width="14" height="14" rx="2" fill="#1a1a1a"/>
-            <rect x="93" y="27" width="14" height="3" fill="#c9a227"/>
+            <polygon points="100,30 92,100 108,100" fill="url(#needle-grad)" />
+            <polygon points="100,170 95,100 105,100" fill="#FDE68A" />
+            <rect x="92" y="20" width="16" height="16" rx="3" fill="#1a1a1a"/>
+            <rect x="92" y="26" width="16" height="4" fill="#FCD34D"/>
           </g>
 
-          <circle cx="100" cy="100" r="7" fill="white" stroke="#e5e7eb" strokeWidth="1"/>
-          <circle cx="100" cy="100" r="3.5" fill="#10b981"/>
+          <circle cx="100" cy="100" r="8" fill="white" stroke="#FCD34D" strokeWidth="1.5"/>
+          <circle cx="100" cy="100" r="4" fill="#F59E0B"/>
         </svg>
       </div>
 
       {!showStatic && (
-        <div className="mt-4 flex items-center gap-2 bg-emerald-50 rounded-full px-4 py-2 border border-emerald-100">
-          <span className="text-lg">📱</span>
-          <span className="text-xs font-semibold text-emerald-600">
-            Apunta tu móvil hacia la flecha verde 🕋
+        <div className="mt-5 flex items-center gap-2 bg-gradient-to-r from-amber-100 to-orange-100 rounded-full px-4 py-2.5 border border-amber-200">
+          <span className="text-base">🕋</span>
+          <span className="text-xs font-bold text-amber-700">
+            Apunta tu móvil hacia la flecha
           </span>
         </div>
       )}
 
       {showStatic && (
-        <p className="mt-4 text-xs text-gray-400 text-center">
+        <p className="mt-5 text-xs text-gray-500 text-center">
           Sensor de orientación no disponible.
           <br />
-          Ángulo Qibla: <strong className="text-gray-600">{Math.round(qiblaAngle)}°</strong>
+          Ángulo Qibla: <strong className="text-amber-600">{Math.round(qiblaAngle)}°</strong>
         </p>
       )}
     </div>
@@ -194,27 +209,27 @@ function QiblaCompass({ latitude, longitude }) {
 
 function QiblaVerse() {
   return (
-    <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] p-4">
+    <div className="bg-white/70 backdrop-blur-md rounded-3xl border border-white/60 shadow-sm p-5">
       <p
-        className="text-right text-emerald-600 text-lg leading-loose mb-3 pb-3 border-b border-emerald-50"
+        className="text-right text-amber-700 text-xl leading-loose mb-3 pb-3 border-b border-amber-100"
         dir="rtl"
       >
         وَجِّهْ وَجْهَكَ شَطْرَ الْمَسْجِدِ الْحَرَامِ
       </p>
 
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-0.5 h-7 bg-emerald-500 rounded-full" />
+        <div className="w-1 h-8 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full" />
         <div>
-          <p className="text-[9px] font-extrabold text-emerald-500 uppercase tracking-widest">
+          <p className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest">
             Corán · Al-Baqarah
           </p>
-          <p className="text-[8px] text-gray-400 mt-0.5">
+          <p className="text-[9px] text-gray-400 mt-0.5">
             2:144 — Revelación auténtica
           </p>
         </div>
       </div>
 
-      <p className="text-xs text-gray-500 leading-relaxed italic">
+      <p className="text-xs text-gray-600 leading-relaxed italic">
         &ldquo;Vuelve tu rostro en dirección de la Mezquita Sagrada. Y donde quiera que estéis,
         volveos hacia ella.&rdquo;
       </p>
@@ -224,21 +239,23 @@ function QiblaVerse() {
 
 export default function QiblaScreen({ latitude, longitude, onBack }) {
   return (
-    <div className="min-h-screen bg-[#f2f2f7] flex flex-col">
-      <div className="bg-[#FFFBF2] border-b border-[#EDE3D3] px-4 py-4 flex items-center gap-3">
+    <div className="pt-4 pb-4">
+      <div className="flex items-center gap-3 mb-5 px-1">
         <button
           onClick={onBack}
-          className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-emerald-500 font-bold text-lg"
+          className="w-10 h-10 rounded-2xl bg-white/70 backdrop-blur-md border border-white/60 shadow-sm flex items-center justify-center text-amber-600 font-bold text-xl active:scale-90 transition-transform"
         >
           ←
         </button>
         <div>
-          <h1 className="text-base font-bold text-gray-900">Brújula Qibla</h1>
-          <p className="text-xs text-gray-400">Dirección hacia La Meca</p>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+            Dirección
+          </p>
+          <h1 className="text-xl font-black text-gray-800">Brújula Qibla</h1>
         </div>
       </div>
 
-      <div className="flex-1 px-4 py-5 flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <QiblaCompass latitude={latitude} longitude={longitude} />
         <QiblaVerse />
       </div>
