@@ -272,7 +272,63 @@ function PrayerTimesRow({ timings, nextPrayer, timeLeft, locationName, loading }
   )
 }
 
+// 60 versículos curados del Corán — rotan uno por día
+const DAILY_VERSES = [
+  '2:255','2:286','13:28','2:152','39:53','94:5','3:173','40:60',
+  '65:3','51:56','17:44','24:35','50:16','14:7','7:23','12:87',
+  '21:87','28:24','18:10','20:114','2:177','3:190','49:13','55:13',
+  '67:1','112:1','22:77','29:45','33:41','41:30','42:25','57:20',
+  '58:11','62:10','16:97','30:21','25:63','31:17','9:51','10:62',
+  '13:11','15:9','23:1','87:1','93:5','84:6','98:5','35:18',
+  '73:20','7:54','6:162','27:62','3:26','5:3','4:36','1:1',
+  '37:180','3:200','18:46','48:1',
+]
+
+function getDayOfYear() {
+  const now = new Date()
+  return Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000)
+}
+
 function VerseCard() {
+  const [verse, setVerse] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const today = new Date().toDateString()
+    const cacheKey = `mihrab_verse_${today}`
+
+    // Devolver caché si es del mismo día
+    try {
+      const cached = localStorage.getItem(cacheKey)
+      if (cached) {
+        setVerse(JSON.parse(cached))
+        setLoading(false)
+        return
+      }
+    } catch {}
+
+    const ref = DAILY_VERSES[getDayOfYear() % DAILY_VERSES.length]
+    fetch(`https://api.alquran.cloud/v1/ayah/${ref}/editions/quran-uthmani,es.cortes`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.code === 200) {
+          const ar = data.data[0]
+          const es = data.data[1]
+          const v = {
+            arabic: ar.text,
+            translation: es.text,
+            surahEnglish: ar.surah.englishName,
+            surahNumber: ar.surah.number,
+            ayah: ar.numberInSurah,
+          }
+          try { localStorage.setItem(cacheKey, JSON.stringify(v)) } catch {}
+          setVerse(v)
+        }
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -280,22 +336,46 @@ function VerseCard() {
       transition={{ delay: 0.25 }}
       className="bg-white/70 backdrop-blur-md rounded-2xl p-4 mb-6 border border-white/60 shadow-sm"
     >
-      <div className="flex items-start gap-3">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">
-          <Quote size={15} className="text-white" strokeWidth={2.5} />
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">
+          <Quote size={13} className="text-white" strokeWidth={2.5} />
         </div>
-        <div className="flex-1">
-          <p className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest mb-1">
-            Versículo del día
-          </p>
-          <p className="text-xs text-gray-700 italic leading-relaxed">
-            &ldquo;Recordadme, y Yo os recordaré. Sed agradecidos conmigo y no seáis ingratos.&rdquo;
-          </p>
-          <p className="text-[10px] text-gray-500 font-medium mt-1.5">
-            Al-Baqarah · 2:152
-          </p>
-        </div>
+        <p className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest">
+          Versículo del día
+        </p>
+        {!loading && verse && (
+          <span className="ml-auto text-[9px] text-gray-400 font-medium">
+            {verse.surahEnglish} · {verse.surahNumber}:{verse.ayah}
+          </span>
+        )}
       </div>
+
+      {loading ? (
+        <div className="space-y-2">
+          <div className="h-4 bg-amber-100 rounded animate-pulse w-3/4 ml-auto" />
+          <div className="h-4 bg-amber-100 rounded animate-pulse w-full ml-auto" />
+          <div className="h-3 bg-gray-100 rounded animate-pulse w-full mt-3" />
+          <div className="h-3 bg-gray-100 rounded animate-pulse w-2/3" />
+        </div>
+      ) : verse ? (
+        <div className="space-y-3">
+          <p
+            className="text-lg leading-loose text-amber-800 text-right font-medium"
+            dir="rtl"
+            lang="ar"
+          >
+            {verse.arabic}
+          </p>
+          <p className="text-xs text-gray-600 italic leading-relaxed border-t border-amber-100 pt-2">
+            &ldquo;{verse.translation}&rdquo;
+          </p>
+        </div>
+      ) : (
+        <p className="text-xs text-gray-400 italic">
+          &ldquo;Recordadme, y Yo os recordaré. Sed agradecidos conmigo y no seáis ingratos.&rdquo;
+          <span className="block text-[10px] mt-1 not-italic">Al-Baqarah · 2:152</span>
+        </p>
+      )}
     </motion.div>
   )
 }
