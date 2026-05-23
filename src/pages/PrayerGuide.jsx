@@ -1,5 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
-import { ChevronLeft, Play, StopCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronLeft, Play, StopCircle, X, ZoomIn } from 'lucide-react'
 import { PRAYER_RAKAATS, getStepsForRakaa } from '../data/prayerData'
 
 const PRAYERS = [
@@ -12,61 +13,146 @@ const PRAYERS = [
 
 // Mapeo de step.id → imagen de postura real
 const STEP_IMAGE = {
-  niyya:             '/fotos/poses rezo hombre/intencion.png',
-  takbir_initial:    '/fotos/poses rezo hombre/takbir.png',
-  dua_opening:       '/fotos/poses rezo hombre/qiyam.png',
-  basmala:           '/fotos/poses rezo hombre/qiyam.png',
-  fatiha:            '/fotos/poses rezo hombre/qiyam.png',
-  surah:             '/fotos/poses rezo hombre/qiyam.png',
-  takbir_ruku:       '/fotos/poses rezo hombre/qiyam.png',
-  ruku:              '/fotos/poses rezo hombre/ruku.png',
-  tasmi:             '/fotos/poses rezo hombre/qiyam.png',
-  tahmid:            '/fotos/poses rezo hombre/qiyam.png',
-  takbir_sujud:      '/fotos/poses rezo hombre/qiyam.png',
-  sujud_1:           '/fotos/poses rezo hombre/sujud.png',
-  jalsah:            '/fotos/poses rezo hombre/jalsa.png',
-  takbir_sujud2:     '/fotos/poses rezo hombre/jalsa.png',
-  sujud_2:           '/fotos/poses rezo hombre/sujud.png',
-  tashahhud_middle:  '/fotos/poses rezo hombre/jalsa.png',
-  tashahhud_final:   '/fotos/poses rezo hombre/jalsa.png',
-  darood:            '/fotos/poses rezo hombre/jalsa.png',
-  dua_final:         '/fotos/poses rezo hombre/jalsa.png',
-  salam:             null, // caso especial — taslim1 + taslim2
+  niyya:            '/fotos/poses rezo hombre/intencion.png',
+  takbir_initial:   '/fotos/poses rezo hombre/takbir.png',
+  dua_opening:      '/fotos/poses rezo hombre/qiyam.png',
+  basmala:          '/fotos/poses rezo hombre/qiyam.png',
+  fatiha:           '/fotos/poses rezo hombre/qiyam.png',
+  surah:            '/fotos/poses rezo hombre/qiyam.png',
+  takbir_ruku:      '/fotos/poses rezo hombre/qiyam.png',
+  ruku:             '/fotos/poses rezo hombre/ruku.png',
+  tasmi:            '/fotos/poses rezo hombre/qiyam.png',
+  tahmid:           '/fotos/poses rezo hombre/qiyam.png',
+  takbir_sujud:     '/fotos/poses rezo hombre/qiyam.png',
+  sujud_1:          '/fotos/poses rezo hombre/sujud.png',
+  jalsah:           '/fotos/poses rezo hombre/jalsa.png',
+  takbir_sujud2:    '/fotos/poses rezo hombre/jalsa.png',
+  sujud_2:          '/fotos/poses rezo hombre/sujud.png',
+  tashahhud_middle: '/fotos/poses rezo hombre/jalsa.png',
+  tashahhud_final:  '/fotos/poses rezo hombre/jalsa.png',
+  darood:           '/fotos/poses rezo hombre/jalsa.png',
+  dua_final:        '/fotos/poses rezo hombre/jalsa.png',
+  salam:            null, // caso especial: taslim1 + taslim2
 }
 
-function PostureImage({ stepId }) {
-  // Salam: mostrar ambas imágenes (derecha + izquierda) en fila
-  if (stepId === 'salam') {
-    return (
-      <div className="flex items-center gap-1 shrink-0">
-        <div className="w-10 h-10 rounded-xl overflow-hidden bg-amber-50 flex items-center justify-center">
-          <img
-            src="/fotos/poses rezo hombre/taslim1.png"
-            alt="Taslim derecha"
-            className="w-full h-full object-contain"
-          />
-        </div>
-        <div className="w-10 h-10 rounded-xl overflow-hidden bg-amber-50 flex items-center justify-center">
-          <img
-            src="/fotos/poses rezo hombre/taslim2.png"
-            alt="Taslim izquierda"
-            className="w-full h-full object-contain"
-          />
-        </div>
-      </div>
-    )
-  }
-
-  const src = STEP_IMAGE[stepId]
-  if (!src) return null
+/* ─────────────────────────────────────────
+   LIGHTBOX MODAL
+───────────────────────────────────────── */
+function PostureLightbox({ step, onClose }) {
+  const isSalam = step.id === 'salam'
 
   return (
-    <div className="w-[52px] h-[52px] rounded-xl overflow-hidden bg-amber-50 flex items-center justify-center shrink-0">
-      <img src={src} alt={stepId} className="w-full h-full object-contain" />
-    </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex flex-col bg-black/85 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      {/* Close button */}
+      <div className="flex justify-end p-4 shrink-0">
+        <button
+          onClick={onClose}
+          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:scale-90 transition-transform"
+        >
+          <X size={20} className="text-white" />
+        </button>
+      </div>
+
+      {/* Content — stops propagation so tapping content doesn't close */}
+      <div
+        className="flex-1 overflow-y-auto px-6 pb-8 flex flex-col items-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Step title */}
+        <p className="text-[11px] font-bold text-amber-400 uppercase tracking-widest mb-1 text-center">
+          {step.nameAr}
+        </p>
+        <h2 className="text-xl font-black text-white text-center mb-6">
+          {step.name}
+        </h2>
+
+        {/* Image(s) */}
+        {isSalam ? (
+          <div className="flex gap-6 items-center justify-center mb-6">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-36 h-48 bg-[#FFFBF2] rounded-2xl overflow-hidden flex items-center justify-center">
+                <img
+                  src="/fotos/poses rezo hombre/taslim1.png"
+                  alt="Taslim derecha"
+                  className="w-full h-full object-contain p-2"
+                />
+              </div>
+              <span className="text-xs text-amber-300 font-semibold">Derecha →</span>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-36 h-48 bg-[#FFFBF2] rounded-2xl overflow-hidden flex items-center justify-center">
+                <img
+                  src="/fotos/poses rezo hombre/taslim2.png"
+                  alt="Taslim izquierda"
+                  className="w-full h-full object-contain p-2"
+                />
+              </div>
+              <span className="text-xs text-amber-300 font-semibold">← Izquierda</span>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full max-w-xs bg-[#FFFBF2] rounded-3xl overflow-hidden flex items-center justify-center mb-6"
+            style={{ aspectRatio: '3/4' }}>
+            <img
+              src={STEP_IMAGE[step.id]}
+              alt={step.name}
+              className="w-full h-full object-contain p-4"
+            />
+          </div>
+        )}
+
+        {/* Description */}
+        <div className="w-full max-w-sm space-y-3">
+          <p className="text-sm text-white/80 leading-relaxed text-center">
+            {step.description}
+          </p>
+          {step.instruction && (
+            <p className="text-xs text-amber-300/80 italic leading-relaxed text-center">
+              {step.instruction}
+            </p>
+          )}
+          {step.arabic && (
+            <div className="bg-white/8 rounded-2xl px-4 py-4 mt-2 space-y-2 border border-white/10">
+              <p
+                className="text-2xl leading-loose text-amber-200 text-right"
+                dir="rtl"
+                lang="ar"
+              >
+                {step.arabic}
+              </p>
+              {step.transliteration && (
+                <p className="text-xs text-amber-400 italic leading-relaxed">
+                  {step.transliteration}
+                </p>
+              )}
+              <p className="text-xs text-white/60 leading-relaxed">
+                {step.translation}
+              </p>
+            </div>
+          )}
+          {step.note && (
+            <div className="bg-amber-500/15 border border-amber-400/30 rounded-xl px-4 py-3">
+              <p className="text-xs text-amber-300 leading-relaxed">
+                💡 {step.note}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
   )
 }
 
+/* ─────────────────────────────────────────
+   RAKAA DIVIDER
+───────────────────────────────────────── */
 function RakaaHeader({ rakaa, total }) {
   return (
     <div className="flex items-center gap-3 mt-6 mb-3">
@@ -91,41 +177,96 @@ function RakaaHeader({ rakaa, total }) {
   )
 }
 
-function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio }) {
+/* ─────────────────────────────────────────
+   STEP CARD — layout vertical centrado
+───────────────────────────────────────── */
+function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio, onOpenLightbox }) {
   const sessionKey = step.audioUrls?.[0]
   const isPlaying = playingAudioKey === sessionKey
+  const isSalam = step.id === 'salam'
+  const hasImage = isSalam || !!STEP_IMAGE[step.id]
 
   return (
-    <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] px-4 py-4 mb-3">
-      {/* Header */}
-      <div className="flex items-start gap-3 mb-3">
-        <PostureImage stepId={step.id} />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] text-gray-300 font-medium">#{stepNumber}</span>
-            <h3 className="text-sm font-semibold text-gray-900">{step.name}</h3>
-            {step.repeat > 1 && (
-              <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-md">
-                ×{step.repeat}
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-amber-600 mt-0.5" dir="rtl">{step.nameAr}</p>
-        </div>
+    <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] px-4 pt-4 pb-4 mb-3">
+
+      {/* ── Título + número ── */}
+      <div className="flex items-center justify-center gap-2 mb-1">
+        <span className="text-[10px] text-gray-300 font-medium">#{stepNumber}</span>
+        <h3 className="text-sm font-bold text-gray-900 text-center">{step.name}</h3>
+        {step.repeat > 1 && (
+          <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-md">
+            ×{step.repeat}
+          </span>
+        )}
       </div>
+      <p className="text-xs text-amber-600 text-center mb-3" dir="rtl">{step.nameAr}</p>
 
-      {/* Instrucciones */}
-      <p className="text-xs text-gray-500 leading-relaxed mb-0.5">{step.description}</p>
-      <p className="text-[11px] text-gray-400 leading-relaxed mb-2 italic">{step.instruction}</p>
+      {/* ── Imagen centralizada y grande ── */}
+      {hasImage && (
+        <button
+          onClick={() => onOpenLightbox(step)}
+          className="w-full flex flex-col items-center mb-3 group active:scale-98 transition-transform"
+        >
+          {isSalam ? (
+            /* Salam: dos imágenes lado a lado */
+            <div className="flex gap-3 items-end justify-center w-full">
+              <div className="flex-1 max-w-[140px] rounded-2xl overflow-hidden bg-amber-50/80 border border-amber-100"
+                style={{ aspectRatio: '3/4' }}>
+                <img
+                  src="/fotos/poses rezo hombre/taslim1.png"
+                  alt="Taslim derecha"
+                  className="w-full h-full object-contain p-2"
+                />
+              </div>
+              <div className="flex-1 max-w-[140px] rounded-2xl overflow-hidden bg-amber-50/80 border border-amber-100"
+                style={{ aspectRatio: '3/4' }}>
+                <img
+                  src="/fotos/poses rezo hombre/taslim2.png"
+                  alt="Taslim izquierda"
+                  className="w-full h-full object-contain p-2"
+                />
+              </div>
+            </div>
+          ) : (
+            /* Resto de pasos: imagen centrada grande */
+            <div
+              className="w-full max-w-[200px] rounded-2xl overflow-hidden bg-amber-50/80 border border-amber-100"
+              style={{ aspectRatio: '3/4' }}
+            >
+              <img
+                src={STEP_IMAGE[step.id]}
+                alt={step.name}
+                className="w-full h-full object-contain p-3"
+              />
+            </div>
+          )}
 
-      {/* Nota */}
+          {/* Hint "Toca para ampliar" */}
+          <div className="flex items-center gap-1 mt-2 opacity-60 group-active:opacity-100 transition-opacity">
+            <ZoomIn size={11} className="text-amber-600" />
+            <span className="text-[10px] text-amber-600 font-semibold">Toca para ampliar</span>
+          </div>
+        </button>
+      )}
+
+      {/* ── Descripción e instrucción ── */}
+      <p className="text-xs text-gray-500 leading-relaxed mb-0.5 text-center">
+        {step.description}
+      </p>
+      {step.instruction && (
+        <p className="text-[11px] text-gray-400 leading-relaxed mb-3 italic text-center">
+          {step.instruction}
+        </p>
+      )}
+
+      {/* ── Nota ── */}
       {step.note && (
         <div className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 mb-3">
           <p className="text-xs text-amber-700 leading-relaxed">💡 {step.note}</p>
         </div>
       )}
 
-      {/* Texto árabe */}
+      {/* ── Texto árabe ── */}
       {step.arabic && (
         <div className="border-t border-[#EDE3D3] pt-3 mt-2 space-y-2">
           <p
@@ -144,19 +285,15 @@ function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio }) {
         </div>
       )}
 
-      {/* Botón audio */}
+      {/* ── Botón audio ── */}
       {step.audioUrls?.length > 0 && (
         <button
           onClick={() => onPlayAudio(step.audioUrls)}
-          className={`mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 active:scale-95 shadow-sm ${
-            isPlaying
-              ? 'bg-rose-500 hover:bg-rose-600 text-white'
-              : 'text-white'
-          }`}
+          className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 active:scale-95 shadow-sm text-white"
           style={
-            !isPlaying
-              ? { background: 'linear-gradient(135deg, #A06A38 0%, #C2410C 100%)' }
-              : undefined
+            isPlaying
+              ? { background: '#EF4444' }
+              : { background: 'linear-gradient(135deg, #A06A38 0%, #C2410C 100%)' }
           }
         >
           {isPlaying ? (
@@ -170,9 +307,13 @@ function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio }) {
   )
 }
 
+/* ─────────────────────────────────────────
+   MAIN COMPONENT
+───────────────────────────────────────── */
 export default function PrayerGuide({ onBack }) {
   const [selectedPrayer, setSelectedPrayer] = useState('fajr')
   const [playingAudioKey, setPlayingAudioKey] = useState(null)
+  const [lightboxStep, setLightboxStep] = useState(null)
   const audioRef = useRef(null)
 
   const totalRakaas = PRAYER_RAKAATS[selectedPrayer]
@@ -186,9 +327,7 @@ export default function PrayerGuide({ onBack }) {
 
   const stepNumbers = useMemo(() => {
     let counter = 0
-    return allStepsByRakaa.map(({ steps }) =>
-      steps.map(() => ++counter)
-    )
+    return allStepsByRakaa.map(({ steps }) => steps.map(() => ++counter))
   }, [allStepsByRakaa])
 
   function stopAudio() {
@@ -201,19 +340,12 @@ export default function PrayerGuide({ onBack }) {
   }
 
   function playSequence(urls, index, sessionKey) {
-    if (index >= urls.length) {
-      setPlayingAudioKey(null)
-      audioRef.current = null
-      return
-    }
+    if (index >= urls.length) { setPlayingAudioKey(null); audioRef.current = null; return }
     const audio = new Audio(urls[index])
     audioRef.current = audio
     audio.play()
       .then(() => setPlayingAudioKey(sessionKey))
-      .catch((err) => {
-        console.warn('Audio no disponible:', urls[index], err)
-        setPlayingAudioKey(null)
-      })
+      .catch(() => setPlayingAudioKey(null))
     audio.addEventListener('ended', () => {
       audioRef.current = null
       playSequence(urls, index + 1, sessionKey)
@@ -221,12 +353,9 @@ export default function PrayerGuide({ onBack }) {
   }
 
   function handlePlayAudio(audioUrls) {
-    if (!audioUrls || audioUrls.length === 0) return
+    if (!audioUrls?.length) return
     const sessionKey = audioUrls[0]
-    if (playingAudioKey === sessionKey) {
-      stopAudio()
-      return
-    }
+    if (playingAudioKey === sessionKey) { stopAudio(); return }
     stopAudio()
     playSequence(audioUrls, 0, sessionKey)
   }
@@ -252,24 +381,24 @@ export default function PrayerGuide({ onBack }) {
       <h2 className="text-lg font-bold text-gray-900 mb-4">Guía Paso a Paso</h2>
 
       {/* Selector de oración */}
-      <div className="flex gap-2 mb-5 overflow-x-auto pb-1 -mx-1 px-1">
+      <div className="flex gap-2 mb-5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
         {PRAYERS.map((p) => {
           const active = selectedPrayer === p.id
           return (
             <button
               key={p.id}
               onClick={() => handlePrayerChange(p.id)}
-              className="shrink-0 flex flex-col items-center gap-0.5 py-2.5 px-4 rounded-xl transition-all duration-200 active:scale-90 text-white"
+              className="shrink-0 flex flex-col items-center gap-0.5 py-2.5 px-4 rounded-xl transition-all duration-200 active:scale-90"
               style={
                 active
-                  ? { background: 'linear-gradient(135deg, #A06A38 0%, #C2410C 100%)' }
+                  ? { background: 'linear-gradient(135deg, #A06A38 0%, #C2410C 100%)', color: 'white' }
                   : { background: '#FFFBF2', color: '#4A3C2D', border: '1px solid #EDE3D3' }
               }
             >
               <span className={`text-sm font-semibold ${active ? 'text-white' : 'text-gray-800'}`}>
                 {p.label}
               </span>
-              <span className={`text-[9px] leading-tight ${active ? 'opacity-80 text-white' : 'text-gray-400'}`}>
+              <span className={`text-[9px] leading-tight ${active ? 'text-white/80' : 'text-gray-400'}`}>
                 {p.desc}
               </span>
             </button>
@@ -288,6 +417,7 @@ export default function PrayerGuide({ onBack }) {
               stepNumber={stepNumbers[rakaaIdx][stepIdx]}
               playingAudioKey={playingAudioKey}
               onPlayAudio={handlePlayAudio}
+              onOpenLightbox={setLightboxStep}
             />
           ))}
         </div>
@@ -295,13 +425,19 @@ export default function PrayerGuide({ onBack }) {
 
       {/* Footer */}
       <div className="mt-6 text-center">
-        <p className="text-xs text-gray-400 leading-relaxed">
-          Taqabbal Allahu minna wa minkum
-        </p>
-        <p className="text-[10px] text-gray-300 mt-1">
-          Que Allah acepte nuestros rezos
-        </p>
+        <p className="text-xs text-gray-400 leading-relaxed">Taqabbal Allahu minna wa minkum</p>
+        <p className="text-[10px] text-gray-300 mt-1">Que Allah acepte nuestros rezos</p>
       </div>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightboxStep && (
+          <PostureLightbox
+            step={lightboxStep}
+            onClose={() => setLightboxStep(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
