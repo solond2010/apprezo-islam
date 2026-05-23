@@ -62,9 +62,11 @@ function PostureLightbox({ step, onClose }) {
 
       {/* Content — stops propagation so tapping content doesn't close */}
       <div
-        className="flex-1 overflow-y-auto px-6 pb-8 flex flex-col items-center"
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pb-12 scrollbar-none"
         onClick={(e) => e.stopPropagation()}
+        style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom))' }}
       >
+        <div className="flex flex-col items-center w-full">
         {/* Step title */}
         <p className="text-[11px] font-bold text-amber-400 uppercase tracking-widest mb-1 text-center">
           {step.nameAr}
@@ -121,7 +123,7 @@ function PostureLightbox({ step, onClose }) {
           {step.arabic && (
             <div className="bg-white/8 rounded-2xl px-4 py-4 mt-2 space-y-2 border border-white/10">
               <p
-                className="text-2xl leading-loose text-amber-200 text-right"
+                className="text-3xl leading-[2.4] text-amber-200 text-right"
                 dir="rtl"
                 lang="ar"
               >
@@ -145,6 +147,7 @@ function PostureLightbox({ step, onClose }) {
             </div>
           )}
         </div>
+        </div>{/* end inner flex-col */}
       </div>
     </motion.div>
   )
