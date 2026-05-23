@@ -137,72 +137,38 @@ function QiblaCompass({ latitude, longitude }) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col items-center">
-      <div className="relative w-52 h-52">
-        <svg viewBox="0 0 200 200" className="w-full h-full">
-          <circle cx="100" cy="100" r="92" fill="none" stroke="#e5e7eb" strokeWidth="1.5" />
-          <circle cx="100" cy="100" r="86" fill="none" stroke="#f3f4f6" strokeWidth="0.5" />
+      <div className="relative w-52 h-52 flex items-center justify-center">
+        <svg viewBox="0 0 200 200" width="100%" style={{ maxWidth: '220px' }}>
+          <circle cx="100" cy="100" r="90" fill="#f9fafb" stroke="#e5e7eb" strokeWidth="1.5"/>
+          <circle cx="100" cy="100" r="75" fill="white" stroke="#f3f4f6" strokeWidth="0.5"/>
 
-          {[
-            { label: 'N', angle: 0 },
-            { label: 'E', angle: 90 },
-            { label: 'S', angle: 180 },
-            { label: 'O', angle: 270 },
-          ].map(({ label, angle }) => {
-            const rad = toRad(angle - 90)
-            const r = 78
-            return (
-              <text
-                key={label}
-                x={100 + r * Math.cos(rad)}
-                y={100 + r * Math.sin(rad)}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill="#9ca3af"
-                fontSize="11"
-                fontWeight="600"
-                fontFamily="system-ui"
-              >
-                {label}
-              </text>
-            )
-          })}
+          <line x1="100" y1="12" x2="100" y2="24" stroke="#d1d5db" strokeWidth="1.5"/>
+          <line x1="100" y1="176" x2="100" y2="188" stroke="#d1d5db" strokeWidth="1"/>
+          <line x1="12" y1="100" x2="24" y2="100" stroke="#d1d5db" strokeWidth="1"/>
+          <line x1="176" y1="100" x2="188" y2="100" stroke="#d1d5db" strokeWidth="1"/>
 
-          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle) => {
-            const rad = toRad(angle - 90)
-            const isCardinal = angle % 90 === 0
-            const r1 = isCardinal ? 84 : 87
-            const r2 = 92
-            return (
-              <line
-                key={angle}
-                x1={100 + r1 * Math.cos(rad)}
-                y1={100 + r1 * Math.sin(rad)}
-                x2={100 + r2 * Math.cos(rad)}
-                y2={100 + r2 * Math.sin(rad)}
-                stroke={isCardinal ? '#9ca3af' : '#d1d5db'}
-                strokeWidth={isCardinal ? 1.5 : 0.8}
-              />
-            )
-          })}
+          <text x="100" y="11" textAnchor="middle" fontSize="11" fill="#374151" fontWeight="700" fontFamily="system-ui">N</text>
+          <text x="100" y="196" textAnchor="middle" fontSize="10" fill="#9ca3af" fontFamily="system-ui">S</text>
+          <text x="196" y="104" textAnchor="middle" fontSize="10" fill="#9ca3af" fontFamily="system-ui">E</text>
+          <text x="7" y="104" textAnchor="middle" fontSize="10" fill="#9ca3af" fontFamily="system-ui">O</text>
 
-          <polygon points="100,28 94,100 106,100" fill="#9ca3af" />
-          <polygon points="100,172 94,100 106,100" fill="#e5e7eb" />
+          <polygon points="100,28 95,100 105,100" fill="#9ca3af"/>
+          <polygon points="100,172 95,100 105,100" fill="#e5e7eb"/>
 
           <g
             style={{
               transform: `rotate(${showStatic ? qiblaAngle : needleRotation}deg)`,
-              transformOrigin: 'center',
-              transformBox: 'fill-box',
+              transformOrigin: '100px 100px',
               transition: 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             }}
           >
-            <polygon points="100,24 94,96 106,96" fill="#10b981" />
-            <rect x="93" y="12" width="14" height="14" rx="2.5" fill="#1a1a1a" />
-            <rect x="93" y="17" width="14" height="2.5" fill="#c9a227" />
+            <polygon points="100,32 94,96 106,96" fill="#10b981"/>
+            <rect x="93" y="22" width="14" height="14" rx="2" fill="#1a1a1a"/>
+            <rect x="93" y="27" width="14" height="3" fill="#c9a227"/>
           </g>
 
-          <circle cx="100" cy="100" r="8" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-          <circle cx="100" cy="100" r="4" fill="#10b981" />
+          <circle cx="100" cy="100" r="7" fill="white" stroke="#e5e7eb" strokeWidth="1"/>
+          <circle cx="100" cy="100" r="3.5" fill="#10b981"/>
         </svg>
       </div>
 
