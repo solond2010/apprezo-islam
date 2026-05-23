@@ -1,5 +1,5 @@
-// Recitador: Abdul Basit Abdul Samad (everyayah.com)
-const EA = 'https://everyayah.com/data/AbdulSamad_64kbps_QuranExplorer.Com'
+// Recitador: Abdul Basit Abdul Samad — Murattal 192kbps (everyayah.com)
+const EA = 'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps'
 
 // Helper: genera URLs para una o varias ayahs de una sura
 // quranAudio(1, 1)        → ['...001001.mp3']
@@ -7,13 +7,6 @@ const EA = 'https://everyayah.com/data/AbdulSamad_64kbps_QuranExplorer.Com'
 function quranAudio(surah, ...ayahs) {
   const s = String(surah).padStart(3, '0')
   return ayahs.map((a) => `${EA}/${s}${String(a).padStart(3, '0')}.mp3`)
-}
-
-// Dhikrs del rezo: al-hamdoulillah.com (Hisnul Muslim CDN, audio limpio)
-// Clips individuales por número de invocación
-const AH = 'https://www.al-hamdoulillah.com/invocations/mp3'
-function dhikrAudio(n) {
-  return [`${AH}/${n}.mp3`]
 }
 
 export const PRAYER_RAKAATS = {
@@ -70,7 +63,7 @@ export const PRAYER_STEPS = [
     translation:
       'Gloria a Ti, oh Allah, y toda alabanza es Tuya. Bendito es Tu nombre, exaltada Tu majestad. No hay dios sino Tú.',
     audioKey: 'dua_opening',
-    audioUrls: dhikrAudio(28),
+    audioUrls: null,
     repeat: 1,
     onlyFirstRakaa: true,
   },
@@ -150,7 +143,7 @@ export const PRAYER_STEPS = [
     transliteration: "Subhāna rabbiyal 'azīm",
     translation: 'Gloria a mi Señor, el Grandioso',
     audioKey: 'ruku_tasbih',
-    audioUrls: dhikrAudio(33),
+    audioUrls: null,
     repeat: 3,
   },
   {
@@ -164,7 +157,7 @@ export const PRAYER_STEPS = [
     transliteration: "Sami'a Llāhu liman hamidah",
     translation: 'Allah escucha a quien Le alaba',
     audioKey: 'tasmi',
-    audioUrls: dhikrAudio(38),
+    audioUrls: null,
     repeat: 1,
   },
   {
@@ -178,7 +171,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Rabbanā wa laka l-hamd',
     translation: 'Señor nuestro, a Ti sea toda la alabanza',
     audioKey: 'tahmid',
-    audioUrls: dhikrAudio(39),
+    audioUrls: null,
     repeat: 1,
   },
   {
@@ -206,7 +199,7 @@ export const PRAYER_STEPS = [
     transliteration: "Subhāna rabbiyal a'lā",
     translation: 'Gloria a mi Señor, el Altísimo',
     audioKey: 'sujud_tasbih',
-    audioUrls: dhikrAudio(41),
+    audioUrls: null,
     repeat: 3,
   },
   {
@@ -220,7 +213,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Rabbi ghfir lī',
     translation: 'Señor mío, perdóname',
     audioKey: 'jalsah',
-    audioUrls: dhikrAudio(48),
+    audioUrls: null,
     repeat: 1,
   },
   {
@@ -248,7 +241,7 @@ export const PRAYER_STEPS = [
     transliteration: "Subhāna rabbiyal a'lā",
     translation: 'Gloria a mi Señor, el Altísimo',
     audioKey: 'sujud_tasbih',
-    audioUrls: dhikrAudio(41),
+    audioUrls: null,
     repeat: 3,
   },
   {
@@ -265,7 +258,7 @@ export const PRAYER_STEPS = [
     translation:
       'Todos los saludos, oraciones y palabras buenas son para Allah. La paz sea contigo, oh Profeta, y la misericordia y bendiciones de Allah. La paz sea con nosotros y con los siervos virtuosos de Allah. Atestiguo que no hay dios sino Allah, y atestiguo que Muhammad es Su siervo y mensajero.',
     audioKey: 'tashahhud',
-    audioUrls: dhikrAudio(52),
+    audioUrls: null,
     repeat: 1,
     afterRakaa: 2,
     notLastRakaa: true,
@@ -282,7 +275,7 @@ export const PRAYER_STEPS = [
     transliteration: 'At-tahiyyātu lillāhi... (igual que el tashahhud intermedio)',
     translation: 'Igual que el tashahhud intermedio',
     audioKey: 'tashahhud',
-    audioUrls: dhikrAudio(52),
+    audioUrls: null,
     repeat: 1,
     lastRakaaOnly: true,
   },
@@ -300,7 +293,7 @@ export const PRAYER_STEPS = [
     translation:
       'Oh Allah, envía bendiciones sobre Muhammad y sobre la familia de Muhammad, como enviaste bendiciones sobre Ibrahim y la familia de Ibrahim. Ciertamente Tú eres Digno de alabanza, Glorioso.',
     audioKey: 'darood',
-    audioUrls: dhikrAudio(53),
+    audioUrls: null,
     repeat: 1,
     lastRakaaOnly: true,
   },
@@ -318,7 +311,7 @@ export const PRAYER_STEPS = [
     translation:
       'Oh Allah, me he hecho a mí mismo mucha injusticia y nadie perdona los pecados sino Tú, así que concédeme Tu perdón y ten misericordia de mí. Ciertamente Tú eres el Perdonador, el Misericordioso.',
     audioKey: 'dua_final',
-    audioUrls: dhikrAudio(57),
+    audioUrls: null,
     repeat: 1,
     lastRakaaOnly: true,
   },
