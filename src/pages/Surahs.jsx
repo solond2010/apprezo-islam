@@ -313,13 +313,13 @@ const surahs = [
       {
         ayah: 1,
         arabic: 'أَلَمْ تَرَ كَيْفَ فَعَلَ رَبُّكَ بِأَصْحَابِ الْفِيلِ',
-        transliteracion: 'Alam tara kayfa fa'ala rabbuka bi-as-habil-fil',
+        transliteracion: 'Alam tara kayfa fa\'ala rabbuka bi-as-habil-fil',
         traduccion: '¿No has visto cómo actuó tu Señor con los del elefante?',
       },
       {
         ayah: 2,
         arabic: 'أَلَمْ يَجْعَلْ كَيْدَهُمْ فِي تَضْلِيلٍ',
-        transliteracion: 'Alam yaj'al kaydahum fi tadlil',
+        transliteracion: 'Alam yaj\'al kaydahum fi tadlil',
         traduccion: '¿Acaso no frustró su plan?',
       },
       {
