@@ -50,24 +50,6 @@ export const PRAYER_STEPS = [
     onlyFirstRakaa: true,
   },
   {
-    id: 'dua_opening',
-    name: "Du'a de apertura",
-    nameAr: 'دعاء الاستفتاح',
-    position: 'standing',
-    description: 'Recita en voz baja solo en la primera rakaa:',
-    instruction: 'Manos sobre el pecho, derecha sobre izquierda.',
-    arabic:
-      'سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ، وَتَبَارَكَ اسْمُكَ، وَتَعَالَى جَدُّكَ، وَلَا إِلَهَ غَيْرُكَ',
-    transliteration:
-      "Subhānaka Allāhumma wa bihamdik, wa tabārakasmuk, wa ta'ālā jadduk, wa lā ilāha ghayruk",
-    translation:
-      'Gloria a Ti, oh Allah, y toda alabanza es Tuya. Bendito es Tu nombre, exaltada Tu majestad. No hay dios sino Tú.',
-    audioKey: 'dua_opening',
-    audioUrls: null,
-    repeat: 1,
-    onlyFirstRakaa: true,
-  },
-  {
     id: 'basmala',
     name: 'Bismillah',
     nameAr: 'البسملة',
