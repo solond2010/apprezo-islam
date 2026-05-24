@@ -63,7 +63,7 @@ export default function Ajustes() {
           icon={User}
           iconColor="text-rose-500"
           iconBg="bg-rose-50"
-          label="Género para posturas"
+          label="Género"
         >
           <div className="flex gap-2">
             <button
