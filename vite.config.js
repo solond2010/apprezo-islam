@@ -10,10 +10,11 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'El Rezo - Islam',
-        short_name: 'El Rezo',
-        theme_color: '#10b981',
-        background_color: '#111827',
+        name: 'Mihrab - Aprende a Rezar',
+        short_name: 'Mihrab',
+        description: 'Tu guía paso a paso para aprender a rezar',
+        theme_color: '#A06A38',
+        background_color: '#FFF4E0',
         display: 'standalone',
         lang: 'es',
         icons: [
@@ -21,11 +22,13 @@ export default defineConfig({
             src: 'icon-192x192.png',
             sizes: '192x192',
             type: 'image/png',
+            purpose: 'any maskable',
           },
           {
             src: 'icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
+            purpose: 'any maskable',
           },
         ],
       },
