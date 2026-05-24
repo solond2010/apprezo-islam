@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useSettings } from '../context/SettingsContext'
-import { Text, Sun, Moon, Minus, Plus, Info, Heart } from 'lucide-react'
+import { Text, Sun, Moon, Minus, Plus, Info, Heart, User } from 'lucide-react'
 
 function SettingRow({ icon: Icon, iconColor = 'text-amber-600', iconBg = 'bg-amber-50', label, children }) {
   return (
@@ -19,7 +19,7 @@ function SettingRow({ icon: Icon, iconColor = 'text-amber-600', iconBg = 'bg-amb
 }
 
 export default function Ajustes() {
-  const { fontSize, increaseFont, decreaseFont, darkMode, setDarkMode } = useSettings()
+  const { fontSize, increaseFont, decreaseFont, darkMode, setDarkMode, userGender, setUserGender } = useSettings()
 
   return (
     <motion.div
@@ -57,6 +57,36 @@ export default function Ajustes() {
           >
             <Plus size={14} className="text-gray-600" />
           </button>
+        </SettingRow>
+
+        <SettingRow
+          icon={User}
+          iconColor="text-rose-500"
+          iconBg="bg-rose-50"
+          label="Género para posturas"
+        >
+          <div className="flex gap-2">
+            <button
+              onClick={() => setUserGender('hombre')}
+              className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition-all ${
+                userGender === 'hombre'
+                  ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Hombre
+            </button>
+            <button
+              onClick={() => setUserGender('mujer')}
+              className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition-all ${
+                userGender === 'mujer'
+                  ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Mujer
+            </button>
+          </div>
         </SettingRow>
 
         <SettingRow
