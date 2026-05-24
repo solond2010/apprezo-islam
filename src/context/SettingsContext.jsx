@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { LOCATIONS } from '../data/locations'
 
 const SettingsContext = createContext(null)
 
@@ -15,10 +16,24 @@ export function SettingsProvider({ children }) {
 
   // userGender: 'hombre' | 'mujer'
   // Controla qué imágenes de posturas y audios se muestran en la Guía de Rezo.
-  // TODO: Conectar selector en Ajustes para que el usuario lo cambie.
   const [userGender, setUserGender] = useState(() => {
     const saved = localStorage.getItem('rezar-user-gender')
     return saved === 'mujer' ? 'mujer' : 'hombre'
+  })
+
+  // userLocation: { lat, lon, name }
+  // Ubicación del usuario para obtener horarios de rezo.
+  // Si no hay ubicación guardada, se usa Madrid como default.
+  const [userLocation, setUserLocation] = useState(() => {
+    const saved = localStorage.getItem('rezar-user-location')
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch {
+        return LOCATIONS[0] // Madrid fallback
+      }
+    }
+    return LOCATIONS[0] // Madrid
   })
 
   useEffect(() => {
@@ -34,6 +49,10 @@ export function SettingsProvider({ children }) {
     localStorage.setItem('rezar-user-gender', userGender)
   }, [userGender])
 
+  useEffect(() => {
+    localStorage.setItem('rezar-user-location', JSON.stringify(userLocation))
+  }, [userLocation])
+
   function increaseFont() {
     setFontSize((s) => Math.min(s + 2, 40))
   }
@@ -43,7 +62,7 @@ export function SettingsProvider({ children }) {
   }
 
   return (
-    <SettingsContext.Provider value={{ fontSize, setFontSize, increaseFont, decreaseFont, darkMode, setDarkMode, userGender, setUserGender }}>
+    <SettingsContext.Provider value={{ fontSize, setFontSize, increaseFont, decreaseFont, darkMode, setDarkMode, userGender, setUserGender, userLocation, setUserLocation }}>
       {children}
     </SettingsContext.Provider>
   )

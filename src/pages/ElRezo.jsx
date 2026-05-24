@@ -383,6 +383,7 @@ function VerseCard() {
 }
 
 export default function ElRezo() {
+  const { userLocation } = useSettings()
   const [timings, setTimings] = useState(null)
   const [locationName, setLocationName] = useState('Obteniendo ubicación...')
   const [loading, setLoading] = useState(true)
@@ -395,7 +396,22 @@ export default function ElRezo() {
   useEffect(() => {
     let cancelled = false
     async function fetchTimings() {
-      const { lat, lon } = await getLocation()
+      // Usar ubicación guardada del usuario, con geolocalización como fallback
+      let lat = userLocation.lat
+      let lon = userLocation.lon
+      let displayName = userLocation.name
+
+      // Si no hay ubicación guardada, intentar geolocalización automática
+      if (!userLocation.manuallySet) {
+        try {
+          const geoCoords = await getLocation()
+          lat = geoCoords.lat
+          lon = geoCoords.lon
+        } catch {
+          // Si geolocalización falla, usar ubicación guardada (que es Madrid por default)
+        }
+      }
+
       if (cancelled) return
       setUserCoords({ lat, lon })
       try {
@@ -404,7 +420,8 @@ export default function ElRezo() {
         const data = await res.json()
         if (cancelled) return
         setTimings(data.data.timings)
-        setLocationName(data.data.meta?.timezone || 'Ubicación actual')
+        // Si la ubicación es de geolocalización automática, mostrar timezone; sino, mostrar nombre guardado
+        setLocationName(data.data.meta?.timezone || displayName || 'Ubicación actual')
       } catch {
         if (cancelled) return
         setTimings(null)
@@ -414,7 +431,7 @@ export default function ElRezo() {
     }
     fetchTimings()
     return () => { cancelled = true }
-  }, [])
+  }, [userLocation])
 
   useEffect(() => {
     if (!timings) return

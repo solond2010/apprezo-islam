@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion'
 import { useSettings } from '../context/SettingsContext'
-import { Text, Sun, Moon, Minus, Plus, Info, Heart, User } from 'lucide-react'
+import { Text, Sun, Moon, Minus, Plus, Info, Heart, User, MapPin, ChevronRight } from 'lucide-react'
+import { useState } from 'react'
+import LocationSelector from '../components/LocationSelector'
 
 function SettingRow({ icon: Icon, iconColor = 'text-amber-600', iconBg = 'bg-amber-50', label, children }) {
   return (
@@ -19,7 +21,8 @@ function SettingRow({ icon: Icon, iconColor = 'text-amber-600', iconBg = 'bg-amb
 }
 
 export default function Ajustes() {
-  const { fontSize, increaseFont, decreaseFont, darkMode, setDarkMode, userGender, setUserGender } = useSettings()
+  const { fontSize, increaseFont, decreaseFont, darkMode, setDarkMode, userGender, setUserGender, userLocation, setUserLocation } = useSettings()
+  const [locationModalOpen, setLocationModalOpen] = useState(false)
 
   return (
     <motion.div
@@ -36,6 +39,21 @@ export default function Ajustes() {
       </div>
 
       <div className="flex flex-col gap-3">
+        <SettingRow
+          icon={MapPin}
+          iconColor="text-cyan-500"
+          iconBg="bg-cyan-50"
+          label="Ubicación"
+        >
+          <button
+            onClick={() => setLocationModalOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md hover:shadow-lg transition-shadow"
+          >
+            <span className="text-sm font-semibold">{userLocation.name}</span>
+            <ChevronRight size={14} />
+          </button>
+        </SettingRow>
+
         <SettingRow
           icon={Text}
           iconColor="text-violet-500"
@@ -135,6 +153,13 @@ export default function Ajustes() {
         <Info size={12} />
         <span>Los cambios se guardan automáticamente</span>
       </div>
+
+      <LocationSelector
+        isOpen={locationModalOpen}
+        onClose={() => setLocationModalOpen(false)}
+        currentLocation={userLocation}
+        onSelect={setUserLocation}
+      />
     </motion.div>
   )
 }
