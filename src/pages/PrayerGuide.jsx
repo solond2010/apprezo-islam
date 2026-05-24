@@ -321,19 +321,21 @@ function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio, onPlayLocalA
 
       {/* ── Botón pronunciación local (.wav) ── */}
       {localAudioUrl && (
-        <div className="flex justify-center mt-3">
-          <button
-            onClick={() => onPlayLocalAudio(localAudioUrl)}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF4E0] border border-[#EDE3D3] hover:bg-[#FBE9D0] active:scale-95 transition-all shadow-sm"
-            style={{ color: '#A06A38' }}
-          >
-            {isLocalPlaying ? (
-              <><StopCircle size={14} strokeWidth={2.5} /><span className="text-xs font-semibold">Detener</span></>
-            ) : (
-              <><Volume2 size={14} strokeWidth={2.5} /><span className="text-xs font-semibold">Escuchar pronunciación</span></>
-            )}
-          </button>
-        </div>
+        <button
+          onClick={() => onPlayLocalAudio(localAudioUrl)}
+          className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 active:scale-95 shadow-sm text-white"
+          style={
+            isLocalPlaying
+              ? { background: '#EF4444' }
+              : { background: 'linear-gradient(135deg, #A06A38 0%, #C2410C 100%)' }
+          }
+        >
+          {isLocalPlaying ? (
+            <><StopCircle size={15} /> Detener</>
+          ) : (
+            <><Play size={15} /> Escuchar pronunciación</>
+          )}
+        </button>
       )}
 
       {/* ── Botón audio (recitación coránica) ── */}
