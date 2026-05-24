@@ -1,7 +1,8 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, Play, StopCircle, X, ZoomIn } from 'lucide-react'
+import { ChevronLeft, Play, StopCircle, X, ZoomIn, Volume2 } from 'lucide-react'
 import { PRAYER_RAKAATS, getStepsForRakaa } from '../data/prayerData'
+import { useSettings } from '../context/SettingsContext'
 
 const PRAYERS = [
   { id: 'fajr',    label: 'Fajr',    desc: '2 rakaas' },
@@ -11,35 +12,54 @@ const PRAYERS = [
   { id: 'isha',    label: 'Isha',    desc: '4 rakaas' },
 ]
 
-// Mapeo de step.id → imagen de postura real
-const STEP_IMAGE = {
-  niyya:            '/fotos/poses rezo hombre/intencion.png',
-  takbir_initial:   '/fotos/poses rezo hombre/takbir.png',
-  dua_opening:      '/fotos/poses rezo hombre/qiyam.png',
-  basmala:          '/fotos/poses rezo hombre/qiyam.png',
-  fatiha:           '/fotos/poses rezo hombre/qiyam.png',
-  surah:            '/fotos/poses rezo hombre/qiyam.png',
-  takbir_ruku:      '/fotos/poses rezo hombre/qiyam.png',
-  ruku:             '/fotos/poses rezo hombre/ruku.png',
-  tasmi:            '/fotos/poses rezo hombre/qiyam.png',
-  tahmid:           '/fotos/poses rezo hombre/qiyam.png',
-  takbir_sujud:     '/fotos/poses rezo hombre/qiyam.png',
-  sujud_1:          '/fotos/poses rezo hombre/sujud.png',
-  jalsah:           '/fotos/poses rezo hombre/jalsa.png',
-  takbir_sujud2:    '/fotos/poses rezo hombre/jalsa.png',
-  sujud_2:          '/fotos/poses rezo hombre/sujud.png',
-  tashahhud_middle: '/fotos/poses rezo hombre/jalsa.png',
-  tashahhud_final:  '/fotos/poses rezo hombre/jalsa.png',
-  darood:           '/fotos/poses rezo hombre/jalsa.png',
-  dua_final:        '/fotos/poses rezo hombre/jalsa.png',
+// Mapeo de step.id → nombre base de imagen (sin género)
+// La ruta final se construye en buildImageUrl() según userGender.
+const STEP_IMAGE_KEY = {
+  niyya:            'intencion',
+  takbir_initial:   'takbir',
+  basmala:          'qiyam',
+  fatiha:           'qiyam',
+  surah:            'qiyam',
+  takbir_ruku:      'qiyam',
+  ruku:             'ruku',
+  tasmi:            'qiyam',
+  tahmid:           'qiyam',
+  takbir_sujud:     'qiyam',
+  sujud_1:          'sujud',
+  jalsah:           'jalsa',
+  takbir_sujud2:    'jalsa',
+  sujud_2:          'sujud',
+  tashahhud_middle: 'jalsa',
+  tashahhud_final:  'jalsa',
+  darood:           'jalsa',
+  dua_final:        'jalsa',
   salam:            null, // caso especial: taslim1 + taslim2
+}
+
+// Carpetas disponibles por género — fallback a hombre si la carpeta de mujer aún no existe
+const GENDER_FOLDERS = {
+  hombre: '/fotos/poses rezo hombre',
+  mujer:  '/fotos/poses rezo mujer', // TODO: subir las ilustraciones de mujer
+}
+
+function buildImageUrl(stepId, gender) {
+  const key = STEP_IMAGE_KEY[stepId]
+  if (!key) return null
+  const folder = GENDER_FOLDERS[gender] || GENDER_FOLDERS.hombre
+  return `${folder}/${key}.png`
+}
+
+function buildLocalAudioUrl(localAudio, gender) {
+  if (!localAudio) return null
+  return `/audio/${gender}_${localAudio}.wav`
 }
 
 /* ─────────────────────────────────────────
    LIGHTBOX MODAL
 ───────────────────────────────────────── */
-function PostureLightbox({ step, onClose }) {
+function PostureLightbox({ step, onClose, gender }) {
   const isSalam = step.id === 'salam'
+  const imgUrl = buildImageUrl(step.id, gender)
 
   return (
     <motion.div
@@ -103,9 +123,13 @@ function PostureLightbox({ step, onClose }) {
           <div className="w-full max-w-xs bg-[#FFFBF2] rounded-3xl overflow-hidden flex items-center justify-center mb-6"
             style={{ aspectRatio: '3/4' }}>
             <img
-              src={STEP_IMAGE[step.id]}
+              src={imgUrl}
               alt={step.name}
               className="w-full h-full object-contain p-4"
+              onError={(e) => {
+                // Fallback a hombre si la imagen de mujer no existe
+                if (gender !== 'hombre') e.currentTarget.src = `${GENDER_FOLDERS.hombre}/${STEP_IMAGE_KEY[step.id]}.png`
+              }}
             />
           </div>
         )}
@@ -183,11 +207,15 @@ function RakaaHeader({ rakaa, total }) {
 /* ─────────────────────────────────────────
    STEP CARD — layout vertical centrado
 ───────────────────────────────────────── */
-function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio, onOpenLightbox }) {
+function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio, onPlayLocalAudio, onOpenLightbox, gender }) {
   const sessionKey = step.audioUrls?.[0]
   const isPlaying = playingAudioKey === sessionKey
+  const localAudioUrl = buildLocalAudioUrl(step.localAudio, gender)
+  const isLocalPlaying = localAudioUrl && playingAudioKey === localAudioUrl
   const isSalam = step.id === 'salam'
-  const hasImage = isSalam || !!STEP_IMAGE[step.id]
+  const stepImgUrl = buildImageUrl(step.id, gender)
+  const hasImage = isSalam || !!STEP_IMAGE_KEY[step.id]
+  const fallbackImg = STEP_IMAGE_KEY[step.id] ? `${GENDER_FOLDERS.hombre}/${STEP_IMAGE_KEY[step.id]}.png` : null
 
   return (
     <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] px-4 pt-4 pb-4 mb-3">
@@ -216,17 +244,19 @@ function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio, onOpenLightb
               <div className="flex-1 max-w-[140px] rounded-2xl overflow-hidden bg-amber-50/80 border border-amber-100"
                 style={{ aspectRatio: '3/4' }}>
                 <img
-                  src="/fotos/poses rezo hombre/taslim1.png"
+                  src={`${GENDER_FOLDERS[gender] || GENDER_FOLDERS.hombre}/taslim1.png`}
                   alt="Taslim derecha"
                   className="w-full h-full object-contain p-2"
+                  onError={(e) => { if (gender !== 'hombre') e.currentTarget.src = `${GENDER_FOLDERS.hombre}/taslim1.png` }}
                 />
               </div>
               <div className="flex-1 max-w-[140px] rounded-2xl overflow-hidden bg-amber-50/80 border border-amber-100"
                 style={{ aspectRatio: '3/4' }}>
                 <img
-                  src="/fotos/poses rezo hombre/taslim2.png"
+                  src={`${GENDER_FOLDERS[gender] || GENDER_FOLDERS.hombre}/taslim2.png`}
                   alt="Taslim izquierda"
                   className="w-full h-full object-contain p-2"
+                  onError={(e) => { if (gender !== 'hombre') e.currentTarget.src = `${GENDER_FOLDERS.hombre}/taslim2.png` }}
                 />
               </div>
             </div>
@@ -237,9 +267,10 @@ function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio, onOpenLightb
               style={{ aspectRatio: '3/4' }}
             >
               <img
-                src={STEP_IMAGE[step.id]}
+                src={stepImgUrl}
                 alt={step.name}
                 className="w-full h-full object-contain p-3"
+                onError={(e) => { if (fallbackImg && gender !== 'hombre') e.currentTarget.src = fallbackImg }}
               />
             </div>
           )}
@@ -288,7 +319,24 @@ function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio, onOpenLightb
         </div>
       )}
 
-      {/* ── Botón audio ── */}
+      {/* ── Botón pronunciación local (.wav) ── */}
+      {localAudioUrl && (
+        <div className="flex justify-center mt-3">
+          <button
+            onClick={() => onPlayLocalAudio(localAudioUrl)}
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF4E0] border border-[#EDE3D3] hover:bg-[#FBE9D0] active:scale-95 transition-all shadow-sm"
+            style={{ color: '#A06A38' }}
+          >
+            {isLocalPlaying ? (
+              <><StopCircle size={14} strokeWidth={2.5} /><span className="text-xs font-semibold">Detener</span></>
+            ) : (
+              <><Volume2 size={14} strokeWidth={2.5} /><span className="text-xs font-semibold">Escuchar pronunciación</span></>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* ── Botón audio (recitación coránica) ── */}
       {step.audioUrls?.length > 0 && (
         <button
           onClick={() => onPlayAudio(step.audioUrls)}
@@ -314,6 +362,7 @@ function StepCard({ step, stepNumber, playingAudioKey, onPlayAudio, onOpenLightb
    MAIN COMPONENT
 ───────────────────────────────────────── */
 export default function PrayerGuide({ onBack }) {
+  const { userGender } = useSettings()
   const [selectedPrayer, setSelectedPrayer] = useState('fajr')
   const [playingAudioKey, setPlayingAudioKey] = useState(null)
   const [lightboxStep, setLightboxStep] = useState(null)
@@ -361,6 +410,22 @@ export default function PrayerGuide({ onBack }) {
     if (playingAudioKey === sessionKey) { stopAudio(); return }
     stopAudio()
     playSequence(audioUrls, 0, sessionKey)
+  }
+
+  // Reproductor de audio local (.wav de pronunciación hombre/mujer)
+  function handlePlayLocalAudio(url) {
+    if (!url) return
+    if (playingAudioKey === url) { stopAudio(); return }
+    stopAudio()
+    const audio = new Audio(url)
+    audioRef.current = audio
+    audio.play()
+      .then(() => setPlayingAudioKey(url))
+      .catch(() => setPlayingAudioKey(null))
+    audio.addEventListener('ended', () => {
+      audioRef.current = null
+      setPlayingAudioKey(null)
+    })
   }
 
   function handlePrayerChange(id) {
@@ -420,7 +485,9 @@ export default function PrayerGuide({ onBack }) {
               stepNumber={stepNumbers[rakaaIdx][stepIdx]}
               playingAudioKey={playingAudioKey}
               onPlayAudio={handlePlayAudio}
+              onPlayLocalAudio={handlePlayLocalAudio}
               onOpenLightbox={setLightboxStep}
+              gender={userGender}
             />
           ))}
         </div>
@@ -438,6 +505,7 @@ export default function PrayerGuide({ onBack }) {
           <PostureLightbox
             step={lightboxStep}
             onClose={() => setLightboxStep(null)}
+            gender={userGender}
           />
         )}
       </AnimatePresence>

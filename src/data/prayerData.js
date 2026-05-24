@@ -46,6 +46,7 @@ export const PRAYER_STEPS = [
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
     audioUrls: null,
+    localAudio: 'takbir',
     repeat: 1,
     onlyFirstRakaa: true,
   },
@@ -112,6 +113,7 @@ export const PRAYER_STEPS = [
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
     audioUrls: null,
+    localAudio: 'takbir',
     repeat: 1,
   },
   {
@@ -126,6 +128,7 @@ export const PRAYER_STEPS = [
     translation: 'Gloria a mi Señor, el Grandioso',
     audioKey: 'ruku_tasbih',
     audioUrls: null,
+    localAudio: 'ruku',
     repeat: 3,
   },
   {
@@ -140,6 +143,7 @@ export const PRAYER_STEPS = [
     translation: 'Allah escucha a quien Le alaba',
     audioKey: 'tasmi',
     audioUrls: null,
+    localAudio: 'sami',
     repeat: 1,
   },
   {
@@ -154,6 +158,7 @@ export const PRAYER_STEPS = [
     translation: 'Señor nuestro, a Ti sea toda la alabanza',
     audioKey: 'tahmid',
     audioUrls: null,
+    localAudio: 'rabbana',
     repeat: 1,
   },
   {
@@ -168,6 +173,7 @@ export const PRAYER_STEPS = [
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
     audioUrls: null,
+    localAudio: 'takbir',
     repeat: 1,
   },
   {
@@ -182,6 +188,7 @@ export const PRAYER_STEPS = [
     translation: 'Gloria a mi Señor, el Altísimo',
     audioKey: 'sujud_tasbih',
     audioUrls: null,
+    localAudio: 'sujud',
     repeat: 3,
   },
   {
@@ -196,6 +203,7 @@ export const PRAYER_STEPS = [
     translation: 'Señor mío, perdóname',
     audioKey: 'jalsah',
     audioUrls: null,
+    localAudio: 'jalsa',
     repeat: 1,
   },
   {
@@ -210,6 +218,7 @@ export const PRAYER_STEPS = [
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
     audioUrls: null,
+    localAudio: 'takbir',
     repeat: 1,
   },
   {
@@ -224,6 +233,7 @@ export const PRAYER_STEPS = [
     translation: 'Gloria a mi Señor, el Altísimo',
     audioKey: 'sujud_tasbih',
     audioUrls: null,
+    localAudio: 'sujud',
     repeat: 3,
   },
   {
