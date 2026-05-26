@@ -174,7 +174,7 @@ function MiniPlayer({ surah, currentAyah, isPlaying, speed, onPlayPause, onPrev,
 
       <div
         className="rounded-2xl overflow-hidden shadow-2xl"
-        style={{ background: 'linear-gradient(135deg, #C2410C 0%, #EA580C 60%, #F97316 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)' }}
       >
         {/* Barra de progreso */}
         <div className="h-1 bg-white/20">
