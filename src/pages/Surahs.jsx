@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronRight, ArrowLeft, Play, Pause,
-  SkipBack, SkipForward, BookOpen, X,
+  SkipBack, SkipForward, BookOpen, X, ChevronUp,
 } from 'lucide-react'
 import { useSettings } from '../context/SettingsContext'
 
@@ -130,9 +130,8 @@ const surahs = [
 
 // ── Mini reproductor global (fijo encima del nav) ─────────────────────────
 
-function MiniPlayer({ surah, currentAyah, isPlaying, speed, onPlayPause, onPrev, onNext, onSpeedChange, onClose, darkMode }) {
-  const speedIdx = SPEEDS.indexOf(speed)
-  const cycleSpeed = () => onSpeedChange(SPEEDS[(speedIdx + 1) % SPEEDS.length])
+function MiniPlayer({ surah, currentAyah, isPlaying, speed, onPlayPause, onPrev, onNext, onSpeedChange, onClose }) {
+  const [showSpeeds, setShowSpeeds] = useState(false)
   const verse = surah?.verses[currentAyah]
 
   return (
@@ -144,59 +143,89 @@ function MiniPlayer({ surah, currentAyah, isPlaying, speed, onPlayPause, onPrev,
       className="fixed left-0 right-0 z-50 px-3"
       style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)' }}
     >
+      {/* Dropdown de velocidad — aparece encima del player */}
+      <AnimatePresence>
+        {showSpeeds && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="absolute bottom-full left-3 mb-2 rounded-2xl overflow-hidden shadow-2xl z-10"
+            style={{ background: 'linear-gradient(135deg, #C2410C, #EA580C)' }}
+          >
+            {SPEEDS.map((s) => (
+              <button
+                key={s}
+                onClick={() => { onSpeedChange(s); setShowSpeeds(false) }}
+                className={`flex items-center justify-between w-full px-5 py-2.5 text-sm font-bold transition-colors ${
+                  s === speed
+                    ? 'bg-white/25 text-white'
+                    : 'text-white/80 active:bg-white/15'
+                }`}
+              >
+                <span>{s === 1 ? '1×  Normal' : s < 1 ? `${s}×  Lento` : `${s}×  Rápido`}</span>
+                {s === speed && <span className="text-white text-xs ml-4">✓</span>}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div
         className="rounded-2xl overflow-hidden shadow-2xl"
-        style={{
-          background: darkMode
-            ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)'
-            : 'linear-gradient(135deg, #7C2D12 0%, #C2410C 50%, #EA580C 100%)',
-        }}
+        style={{ background: 'linear-gradient(135deg, #C2410C 0%, #EA580C 60%, #F97316 100%)' }}
       >
-        {/* Barra de progreso de ayahs */}
+        {/* Barra de progreso */}
         <div className="h-1 bg-white/20">
           <motion.div
-            className="h-full bg-white/60 rounded-full"
+            className="h-full bg-white rounded-full"
             animate={{ width: surah ? `${((currentAyah + 1) / surah.verses.length) * 100}%` : '0%' }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.35 }}
           />
         </div>
 
-        <div className="px-4 py-3">
-          {/* Info del ayah */}
-          <div className="flex items-center justify-between mb-2.5">
+        <div className="px-4 pt-3 pb-3">
+          {/* Info + cerrar */}
+          <div className="flex items-center justify-between mb-3">
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-                {surah?.name} · Ayah {(currentAyah ?? 0) + 1}/{surah?.verses.length}
+                {surah?.name} · Ayah {(currentAyah ?? 0) + 1} / {surah?.verses.length}
               </p>
               <p className="text-white text-xs font-semibold truncate mt-0.5" dir="rtl">
-                {verse?.arabic?.slice(0, 40)}{verse?.arabic?.length > 40 ? '…' : ''}
+                {verse?.arabic?.slice(0, 38)}{(verse?.arabic?.length ?? 0) > 38 ? '…' : ''}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="ml-3 w-7 h-7 rounded-full bg-white/15 flex items-center justify-center active:scale-90 flex-shrink-0"
+              className="ml-3 w-7 h-7 rounded-full bg-white/20 flex items-center justify-center active:scale-90 flex-shrink-0"
             >
               <X size={13} className="text-white" />
             </button>
           </div>
 
-          {/* Controles */}
-          <div className="flex items-center justify-between">
-            {/* Velocidad */}
+          {/* Controles principales */}
+          <div className="flex items-center justify-between gap-2">
+
+            {/* Velocidad — dropdown */}
             <button
-              onClick={cycleSpeed}
-              className="min-w-[48px] h-8 rounded-xl bg-white/15 flex items-center justify-center active:scale-90 px-2"
+              onClick={() => setShowSpeeds(v => !v)}
+              className="flex items-center gap-1 min-w-[52px] h-9 rounded-xl bg-white/20 px-2.5 active:scale-90 transition-transform"
             >
-              <span className="text-[11px] font-black text-white tabular-nums">
+              <span className="text-[12px] font-black text-white tabular-nums leading-none">
                 {speed === 1 ? '1×' : `${speed}×`}
               </span>
+              <ChevronUp
+                size={11}
+                className={`text-white/70 transition-transform ${showSpeeds ? '' : 'rotate-180'}`}
+              />
             </button>
 
             {/* Anterior */}
             <button
               onClick={onPrev}
               disabled={currentAyah === 0}
-              className="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 disabled:opacity-30 bg-white/10"
+              className="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 disabled:opacity-30 bg-white/20 transition-transform"
             >
               <SkipBack size={18} className="text-white" />
             </button>
@@ -207,8 +236,8 @@ function MiniPlayer({ surah, currentAyah, isPlaying, speed, onPlayPause, onPrev,
               className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center active:scale-90 transition-transform"
             >
               {isPlaying
-                ? <Pause size={22} className="text-orange-600" />
-                : <Play size={22} className="text-orange-600 ml-0.5" />
+                ? <Pause size={23} className="text-orange-500" />
+                : <Play size={23} className="text-orange-500 ml-0.5" />
               }
             </button>
 
@@ -216,15 +245,15 @@ function MiniPlayer({ surah, currentAyah, isPlaying, speed, onPlayPause, onPrev,
             <button
               onClick={onNext}
               disabled={!surah || currentAyah >= surah.verses.length - 1}
-              className="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 disabled:opacity-30 bg-white/10"
+              className="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 disabled:opacity-30 bg-white/20 transition-transform"
             >
               <SkipForward size={18} className="text-white" />
             </button>
 
             {/* Recitador */}
-            <div className="min-w-[48px] flex flex-col items-end">
-              <span className="text-[8px] text-white/50 font-bold uppercase leading-none">Recitador</span>
-              <span className="text-[9px] text-white font-bold leading-tight text-right">Al-Sudais</span>
+            <div className="min-w-[52px] flex flex-col items-end">
+              <span className="text-[8px] text-white/50 font-bold uppercase leading-none tracking-wide">Recitador</span>
+              <span className="text-[10px] text-white font-black leading-tight text-right mt-0.5">Al-Sudais</span>
             </div>
           </div>
         </div>
@@ -257,42 +286,63 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
     }
   }, [currentAyah])
 
-  // Aplicar velocidad al audio
+  // Aplicar velocidad al audio en tiempo real sin interrumpir la reproducción
   useEffect(() => {
-    if (audioRef.current) audioRef.current.playbackRate = speed
+    if (audioRef.current) {
+      audioRef.current.playbackRate = speed
+      audioRef.current.defaultPlaybackRate = speed
+    }
   }, [speed])
 
   const playFrom = useCallback((startIdx) => {
     const audio = audioRef.current
     if (!audio) return
-    const token = startIdx + '-' + Date.now()
+
+    // Usar un token para cancelar la secuencia si se llama stopAudio
+    const token = Symbol()
     sequenceRef.current = token
 
-    const playIndex = (idx) => {
+    function playIndex(idx) {
+      // Secuencia cancelada externamente
       if (sequenceRef.current !== token) return
+
+      // Fin de la surah
       if (idx >= surah.verses.length) {
         setIsPlaying(false)
         setCurrentAyah(null)
         sequenceRef.current = null
         return
       }
+
       const verse = surah.verses[idx]
       setCurrentAyah(idx)
       setIsPlaying(true)
+
+      // Usar onended/onerror en lugar de addEventListener
+      // así se sobreescriben solos y nunca se acumulan listeners
+      audio.onended = () => { if (sequenceRef.current === token) playIndex(idx + 1) }
+      audio.onerror = () => { if (sequenceRef.current === token) playIndex(idx + 1) }
+
+      // Cambiar src SIN llamar load() — play() lo hace internamente
       audio.src = ayahUrl(surah.surahNum, verse.ayah)
-      audio.playbackRate = speed
-      audio.load()
-      const onEnded = () => { audio.removeEventListener('ended', onEnded); audio.removeEventListener('error', onEnded); playIndex(idx + 1) }
-      audio.addEventListener('ended', onEnded)
-      audio.addEventListener('error', onEnded)
-      audio.play().catch(() => {})
+      audio.playbackRate = audioRef.current.playbackRate || 1
+
+      const p = audio.play()
+      if (p) p.catch(() => { if (sequenceRef.current === token) playIndex(idx + 1) })
     }
+
     playIndex(startIdx)
-  }, [surah, speed])
+  }, [surah])
 
   function stopAudio() {
-    sequenceRef.current = null
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = '' }
+    sequenceRef.current = null // invalida el token activo
+    const audio = audioRef.current
+    if (audio) {
+      audio.onended = null
+      audio.onerror = null
+      audio.pause()
+      audio.src = ''
+    }
     setIsPlaying(false)
   }
 
@@ -518,7 +568,6 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
             onNext={handleNext}
             onSpeedChange={setSpeed}
             onClose={handleClose}
-            darkMode={darkMode}
           />
         )}
       </AnimatePresence>
