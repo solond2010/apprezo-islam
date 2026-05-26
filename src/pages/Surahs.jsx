@@ -298,15 +298,17 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
     const audio = audioRef.current
     if (!audio) return
 
-    // Usar un token para cancelar la secuencia si se llama stopAudio
     const token = Symbol()
     sequenceRef.current = token
 
-    function playIndex(idx) {
-      // Secuencia cancelada externamente
+    function advance(idx) {
+      // Limpiar handlers antes de hacer cualquier cosa
+      // para evitar que un error del src anterior dispare el siguiente ayah
+      audio.onended = null
+      audio.onerror = null
+
       if (sequenceRef.current !== token) return
 
-      // Fin de la surah
       if (idx >= surah.verses.length) {
         setIsPlaying(false)
         setCurrentAyah(null)
@@ -318,20 +320,28 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
       setCurrentAyah(idx)
       setIsPlaying(true)
 
-      // Usar onended/onerror en lugar de addEventListener
-      // así se sobreescriben solos y nunca se acumulan listeners
-      audio.onended = () => { if (sequenceRef.current === token) playIndex(idx + 1) }
-      audio.onerror = () => { if (sequenceRef.current === token) playIndex(idx + 1) }
-
-      // Cambiar src SIN llamar load() — play() lo hace internamente
+      // Cambiar src y cargar explícitamente
       audio.src = ayahUrl(surah.surahNum, verse.ayah)
-      audio.playbackRate = audioRef.current.playbackRate || 1
+      audio.load()
 
-      const p = audio.play()
-      if (p) p.catch(() => { if (sequenceRef.current === token) playIndex(idx + 1) })
+      // Aplicar velocidad después del load (algunos browsers la resetean)
+      const rate = audioRef.current.defaultPlaybackRate || 1
+      audio.playbackRate = rate
+
+      // Asignar handlers DESPUÉS del load() para que no cojan eventos del src anterior
+      audio.onended = () => advance(idx + 1)
+      audio.onerror = () => advance(idx + 1)
+
+      // play() — el .catch solo captura bloqueo de autoplay, no errores de red
+      // (esos los maneja onerror para evitar el doble avance)
+      audio.play().catch((err) => {
+        if (err.name === 'NotAllowedError' && sequenceRef.current === token) {
+          setIsPlaying(false)
+        }
+      })
     }
 
-    playIndex(startIdx)
+    advance(startIdx)
   }, [surah])
 
   function stopAudio() {
