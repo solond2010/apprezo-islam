@@ -464,7 +464,7 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
                   className="absolute inset-0 rounded-2xl"
                   style={{
                     background: isActive
-                      ? 'linear-gradient(135deg, #431407 0%, #9A3412 100%)'
+                      ? 'linear-gradient(135deg, #FCD34D 0%, #FBBF24 40%, #F59E0B 100%)'
                       : darkMode
                         ? 'rgba(30,30,30,0.8)'
                         : 'rgba(255,255,255,0.75)',
@@ -476,12 +476,10 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
                   {/* Número de ayah + botón play */}
                   <div className="flex items-center justify-between mb-3">
                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                      isActive
-                        ? 'bg-white/20'
-                        : darkMode ? 'bg-white/10' : 'bg-amber-100'
+                      isActive ? 'bg-amber-800/20' : darkMode ? 'bg-white/10' : 'bg-amber-100'
                     }`}>
                       <span className={`text-xs font-black tabular-nums ${
-                        isActive ? 'text-white' : darkMode ? 'text-amber-400' : 'text-amber-700'
+                        isActive ? 'text-amber-900' : darkMode ? 'text-amber-400' : 'text-amber-700'
                       }`}>
                         {idx + 1}
                       </span>
@@ -491,18 +489,18 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
                       onClick={() => isActive && isPlaying ? stopAudio() : handleAyahPlay(idx)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl active:scale-90 transition-all ${
                         isActive
-                          ? 'bg-white/20'
+                          ? 'bg-amber-800/20 border border-amber-700/30'
                           : darkMode
                             ? 'bg-white/10 border border-white/10'
                             : 'bg-amber-50 border border-amber-200'
                       }`}
                     >
                       {isActive && isPlaying
-                        ? <Pause size={13} className={isActive ? 'text-white' : darkMode ? 'text-amber-400' : 'text-amber-600'} />
-                        : <Play size={13} className={`${isActive ? 'text-white' : darkMode ? 'text-amber-400' : 'text-amber-600'} ml-0.5`} />
+                        ? <Pause size={13} className={isActive ? 'text-amber-900' : darkMode ? 'text-amber-400' : 'text-amber-600'} />
+                        : <Play size={13} className={`${isActive ? 'text-amber-900' : darkMode ? 'text-amber-400' : 'text-amber-600'} ml-0.5`} />
                       }
                       <span className={`text-[11px] font-bold ${
-                        isActive ? 'text-white' : darkMode ? 'text-amber-400' : 'text-amber-700'
+                        isActive ? 'text-amber-900' : darkMode ? 'text-amber-400' : 'text-amber-700'
                       }`}>
                         {isActive && isPlaying ? 'Pausar' : 'Escuchar'}
                       </span>
@@ -512,7 +510,7 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
                   {/* Árabe */}
                   <p
                     className={`text-2xl leading-loose text-right mb-3 ${
-                      isActive ? 'text-white' : darkMode ? 'text-gray-100' : 'text-gray-800'
+                      isActive ? 'text-amber-950' : darkMode ? 'text-gray-100' : 'text-gray-800'
                     }`}
                     dir="rtl"
                     lang="ar"
@@ -530,12 +528,12 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
                   </p>
 
                   {/* Separador */}
-                  <div className={`h-px mb-3 ${isActive ? 'bg-white/20' : darkMode ? 'bg-white/10' : 'bg-gray-100'}`} />
+                  <div className={`h-px mb-3 ${isActive ? 'bg-amber-700/25' : darkMode ? 'bg-white/10' : 'bg-gray-100'}`} />
 
                   {/* Transliteración */}
                   <p
                     className={`italic leading-relaxed mb-1.5 ${
-                      isActive ? 'text-white/90 font-semibold' : darkMode ? 'text-gray-300 font-medium' : 'text-gray-600 font-medium'
+                      isActive ? 'text-amber-900 font-semibold' : darkMode ? 'text-gray-300 font-medium' : 'text-gray-600 font-medium'
                     }`}
                     style={{ fontSize: `${fontSize}px` }}
                   >
@@ -544,7 +542,7 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
 
                   {/* Traducción */}
                   <p className={`text-sm leading-relaxed ${
-                    isActive ? 'text-white/70' : darkMode ? 'text-gray-400' : 'text-gray-500'
+                    isActive ? 'text-amber-800' : darkMode ? 'text-gray-400' : 'text-gray-500'
                   }`}>
                     {verse.traduccion}
                   </p>
