@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import { LOCATIONS } from '../data/locations'
+import { RECITERS, getReciter } from '../data/reciters'
 
 const SettingsContext = createContext(null)
 
@@ -36,6 +37,15 @@ export function SettingsProvider({ children }) {
     return LOCATIONS[0] // Madrid
   })
 
+  // reciterId: id del recitador de Quran activo (Surahs + Guía Paso a Paso).
+  // Default: Al-Sudais.
+  const [reciterId, setReciterId] = useState(() => {
+    const saved = localStorage.getItem('rezar-reciter')
+    return saved && RECITERS.some((r) => r.id === saved) ? saved : 'sudais'
+  })
+
+  const reciter = useMemo(() => getReciter(reciterId), [reciterId])
+
   useEffect(() => {
     localStorage.setItem('rezar-font-size', String(fontSize))
   }, [fontSize])
@@ -53,6 +63,10 @@ export function SettingsProvider({ children }) {
     localStorage.setItem('rezar-user-location', JSON.stringify(userLocation))
   }, [userLocation])
 
+  useEffect(() => {
+    localStorage.setItem('rezar-reciter', reciterId)
+  }, [reciterId])
+
   function increaseFont() {
     setFontSize((s) => Math.min(s + 2, 40))
   }
@@ -62,7 +76,13 @@ export function SettingsProvider({ children }) {
   }
 
   return (
-    <SettingsContext.Provider value={{ fontSize, setFontSize, increaseFont, decreaseFont, darkMode, setDarkMode, userGender, setUserGender, userLocation, setUserLocation }}>
+    <SettingsContext.Provider value={{
+      fontSize, setFontSize, increaseFont, decreaseFont,
+      darkMode, setDarkMode,
+      userGender, setUserGender,
+      userLocation, setUserLocation,
+      reciterId, setReciterId, reciter,
+    }}>
       {children}
     </SettingsContext.Provider>
   )

@@ -5,12 +5,7 @@ import {
   SkipBack, SkipForward, BookOpen, X, ChevronUp,
 } from 'lucide-react'
 import { useSettings } from '../context/SettingsContext'
-
-// ── Recitador: Al-Sudais 192kbps ─────────────────────────────────────────
-const EA = 'https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps'
-function ayahUrl(surah, ayah) {
-  return `${EA}/${String(surah).padStart(3, '0')}${String(ayah).padStart(3, '0')}.mp3`
-}
+import { buildAyahUrl } from '../data/reciters'
 
 // ── Velocidades disponibles ───────────────────────────────────────────────
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
@@ -130,7 +125,7 @@ const surahs = [
 
 // ── Mini reproductor global (fijo encima del nav) ─────────────────────────
 
-function MiniPlayer({ surah, currentAyah, isPlaying, speed, onPlayPause, onPrev, onNext, onSpeedChange, onClose }) {
+function MiniPlayer({ surah, currentAyah, isPlaying, speed, onPlayPause, onPrev, onNext, onSpeedChange, onClose, reciter }) {
   const [showSpeeds, setShowSpeeds] = useState(false)
   const verse = surah?.verses[currentAyah]
 
@@ -251,9 +246,11 @@ function MiniPlayer({ surah, currentAyah, isPlaying, speed, onPlayPause, onPrev,
             </button>
 
             {/* Recitador */}
-            <div className="min-w-[52px] flex flex-col items-end">
+            <div className="min-w-[52px] max-w-[90px] flex flex-col items-end">
               <span className="text-[8px] text-white/50 font-bold uppercase leading-none tracking-wide">Recitador</span>
-              <span className="text-[10px] text-white font-black leading-tight text-right mt-0.5">Al-Sudais</span>
+              <span className="text-[10px] text-white font-black leading-tight text-right mt-0.5 truncate w-full">
+                {reciter?.name || 'Al-Sudais'}
+              </span>
             </div>
           </div>
         </div>
@@ -264,7 +261,7 @@ function MiniPlayer({ surah, currentAyah, isPlaying, speed, onPlayPause, onPrev,
 
 // ── Detalle de surah ──────────────────────────────────────────────────────
 
-function SurahDetail({ surah, onBack, fontSize, darkMode }) {
+function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
   const [currentAyah, setCurrentAyah] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
@@ -321,7 +318,7 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
       setIsPlaying(true)
 
       // Cambiar src y cargar explícitamente
-      audio.src = ayahUrl(surah.surahNum, verse.ayah)
+      audio.src = buildAyahUrl(reciter.path, surah.surahNum, verse.ayah)
       audio.load()
 
       // Aplicar velocidad después del load (algunos browsers la resetean)
@@ -342,7 +339,7 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
     }
 
     advance(startIdx)
-  }, [surah])
+  }, [surah, reciter])
 
   function stopAudio() {
     sequenceRef.current = null // invalida el token activo
@@ -446,7 +443,7 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
               </div>
               <h3 className="text-2xl font-black text-white">{surah.name}</h3>
               <p className="text-sm text-white/70 mt-1">{surah.meaning} · {surah.verses.length} ayahs</p>
-              <p className="text-xs text-white/50 mt-1">Recitador: Al-Sudais</p>
+              <p className="text-xs text-white/50 mt-1">Recitador: {reciter?.name || 'Al-Sudais'}</p>
             </div>
             <p className="text-4xl text-amber-200/80 font-light" dir="rtl">{surah.nameAr}</p>
           </div>
@@ -576,6 +573,7 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
             onNext={handleNext}
             onSpeedChange={setSpeed}
             onClose={handleClose}
+            reciter={reciter}
           />
         )}
       </AnimatePresence>
@@ -585,7 +583,7 @@ function SurahDetail({ surah, onBack, fontSize, darkMode }) {
 
 // ── Lista de surahs ───────────────────────────────────────────────────────
 
-function SurahList({ onSelect, darkMode }) {
+function SurahList({ onSelect, darkMode, reciter }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -603,7 +601,7 @@ function SurahList({ onSelect, darkMode }) {
           Surahs
         </h1>
         <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-          Recitador: Al-Sudais · {surahs.length} surahs disponibles
+          Recitador: {reciter?.name || 'Al-Sudais'} · {surahs.length} surahs disponibles
         </p>
       </div>
 
@@ -614,8 +612,9 @@ function SurahList({ onSelect, darkMode }) {
       >
         <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-white/20 pointer-events-none" />
         <p className="text-[10px] font-bold text-white/80 uppercase tracking-widest mb-1">Recitador activo</p>
-        <h3 className="text-xl font-black text-white">Sheikh Al-Sudais</h3>
-        <p className="text-xs text-white/80 mt-1">Imam de la Gran Mezquita de La Meca · 192kbps</p>
+        <h3 className="text-xl font-black text-white">{reciter?.name || 'Al-Sudais'}</h3>
+        <p className="text-xs text-white/80 mt-1">{reciter?.desc || 'Imam de La Meca'}</p>
+        <p className="text-[10px] text-white/60 mt-2 italic">Puedes cambiarlo en Ajustes</p>
       </div>
 
       {/* Lista */}
@@ -653,7 +652,7 @@ function SurahList({ onSelect, darkMode }) {
                 <div className="flex items-center gap-1">
                   <Play size={9} className={darkMode ? 'text-amber-500' : 'text-amber-500'} />
                   <span className={`text-[10px] font-semibold ${darkMode ? 'text-amber-500' : 'text-amber-600'}`}>
-                    Al-Sudais
+                    {reciter?.name || 'Al-Sudais'}
                   </span>
                 </div>
               </div>
@@ -677,13 +676,13 @@ function SurahList({ onSelect, darkMode }) {
 
 export default function Surahs() {
   const [selected, setSelected] = useState(null)
-  const { fontSize, darkMode } = useSettings()
+  const { fontSize, darkMode, reciter } = useSettings()
 
   return (
     <div className="pt-0 pb-2">
       <AnimatePresence mode="wait">
         {selected === null ? (
-          <SurahList key="list" onSelect={setSelected} darkMode={darkMode} />
+          <SurahList key="list" onSelect={setSelected} darkMode={darkMode} reciter={reciter} />
         ) : (
           <SurahDetail
             key={`surah-${selected.id}`}
@@ -691,6 +690,7 @@ export default function Surahs() {
             onBack={() => setSelected(null)}
             fontSize={fontSize}
             darkMode={darkMode}
+            reciter={reciter}
           />
         )}
       </AnimatePresence>

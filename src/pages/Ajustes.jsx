@@ -1,8 +1,9 @@
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useSettings } from '../context/SettingsContext'
-import { Text, Sun, Moon, Minus, Plus, Info, Heart, User, MapPin, ChevronRight } from 'lucide-react'
+import { Text, Sun, Moon, Minus, Plus, Info, Heart, User, MapPin, ChevronRight, Mic, ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import LocationSelector from '../components/LocationSelector'
+import { RECITERS } from '../data/reciters'
 
 function SettingRow({ icon: Icon, iconColor = 'text-amber-600', iconBg = 'bg-amber-50', label, children }) {
   return (
@@ -21,8 +22,15 @@ function SettingRow({ icon: Icon, iconColor = 'text-amber-600', iconBg = 'bg-amb
 }
 
 export default function Ajustes() {
-  const { fontSize, increaseFont, decreaseFont, darkMode, setDarkMode, userGender, setUserGender, userLocation, setUserLocation } = useSettings()
+  const {
+    fontSize, increaseFont, decreaseFont,
+    darkMode, setDarkMode,
+    userGender, setUserGender,
+    userLocation, setUserLocation,
+    reciterId, setReciterId, reciter,
+  } = useSettings()
   const [locationModalOpen, setLocationModalOpen] = useState(false)
+  const [reciterOpen, setReciterOpen] = useState(false)
 
   return (
     <motion.div
@@ -53,6 +61,72 @@ export default function Ajustes() {
             <ChevronRight size={14} />
           </button>
         </SettingRow>
+
+        {/* ── Recitador del Quran ────────────────────────────────── */}
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/60 overflow-hidden">
+          <button
+            onClick={() => setReciterOpen((v) => !v)}
+            className="w-full px-4 py-4 flex items-center justify-between active:bg-white/40 transition-colors"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center shrink-0">
+                <Mic size={18} className="text-emerald-600" strokeWidth={2.2} />
+              </div>
+              <div className="text-left min-w-0">
+                <p className="text-sm font-semibold text-gray-800">Recitador del Quran</p>
+                <p className="text-[11px] text-gray-500 truncate">{reciter.name} · {reciter.desc}</p>
+              </div>
+            </div>
+            <ChevronDown
+              size={18}
+              className={`text-gray-400 transition-transform ${reciterOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          <AnimatePresence initial={false}>
+            {reciterOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+                className="overflow-hidden border-t border-amber-100"
+              >
+                <div className="px-2 py-2 flex flex-col gap-1">
+                  {RECITERS.map((r) => {
+                    const active = r.id === reciterId
+                    return (
+                      <button
+                        key={r.id}
+                        onClick={() => { setReciterId(r.id); setReciterOpen(false) }}
+                        className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl transition-all ${
+                          active
+                            ? 'shadow-md text-white'
+                            : 'active:bg-amber-50 text-gray-700'
+                        }`}
+                        style={active ? { background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)' } : undefined}
+                      >
+                        <div className="text-left min-w-0">
+                          <p className={`text-sm font-bold ${active ? 'text-white' : 'text-gray-800'}`}>
+                            {r.name}
+                          </p>
+                          <p className={`text-[10px] ${active ? 'text-white/85' : 'text-gray-500'}`}>
+                            {r.desc}
+                          </p>
+                        </div>
+                        {active && (
+                          <div className="w-5 h-5 rounded-full bg-white/30 flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-[10px] font-black">✓</span>
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         <SettingRow
           icon={Text}

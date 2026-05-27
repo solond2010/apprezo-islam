@@ -1,12 +1,11 @@
-// Recitador: Abdul Basit Abdul Samad — Murattal 192kbps (everyayah.com)
-const EA = 'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps'
-
-// Helper: genera URLs para una o varias ayahs de una sura
-// quranAudio(1, 1)        → ['...001001.mp3']
-// quranAudio(1, 2, 3, 7)  → ['...001002.mp3', '...001003.mp3', '...001007.mp3']
-function quranAudio(surah, ...ayahs) {
-  const s = String(surah).padStart(3, '0')
-  return ayahs.map((a) => `${EA}/${s}${String(a).padStart(3, '0')}.mp3`)
+// Helper: genera refs [surah, ayah] para una o varias ayahs de una sura.
+// Estas refs se convierten en URLs en tiempo de ejecución según el recitador
+// seleccionado por el usuario (ver reciters.js + SettingsContext).
+//
+// quranRefs(1, 1)        → [[1, 1]]
+// quranRefs(1, 2, 3, 7)  → [[1, 2], [1, 3], [1, 7]]
+function quranRefs(surah, ...ayahs) {
+  return ayahs.map((a) => [surah, a])
 }
 
 export const PRAYER_RAKAATS = {
@@ -30,7 +29,7 @@ export const PRAYER_STEPS = [
     transliteration: null,
     translation: null,
     audioKey: null,
-    audioUrls: null,
+    quranRefs: null,
     repeat: 1,
     onlyFirstRakaa: true,
   },
@@ -45,7 +44,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Allāhu Akbar',
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
-    audioUrls: null,
+    quranRefs: null,
     localAudio: 'takbir',
     repeat: 1,
     onlyFirstRakaa: true,
@@ -61,7 +60,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Bismillāhi r-rahmāni r-rahīm',
     translation: 'En el nombre de Allah, el Compasivo, el Misericordioso',
     audioKey: 'basmala',
-    audioUrls: quranAudio(1, 1),
+    quranRefs: quranRefs(1, 1),
     repeat: 1,
   },
   {
@@ -80,7 +79,7 @@ export const PRAYER_STEPS = [
       'Toda alabanza pertenece a Allah, Señor de los mundos, el Compasivo, el Misericordioso, Dueño del Día del Juicio. Solo a Ti adoramos y solo a Ti pedimos ayuda. Guíanos por el camino recto, el camino de quienes has bendecido, no de los que se han ganado la ira ni de los extraviados.',
     audioKey: 'fatiha',
     // Surah 1, ayahs 2-7 (la basmala = ayah 1 ya está en el paso anterior)
-    audioUrls: quranAudio(1, 2, 3, 4, 5, 6, 7),
+    quranRefs: quranRefs(1, 2, 3, 4, 5, 6, 7),
     repeat: 1,
     note: 'Ameen — di Ameen en voz baja al terminar',
   },
@@ -97,7 +96,7 @@ export const PRAYER_STEPS = [
     translation: 'Di: Él es Allah, Uno. Allah, el Eterno Absoluto. No engendró ni fue engendrado. Y no hay nadie comparable a Él.',
     audioKey: 'surah_ikhlas',
     // Surah 112 (Al-Ikhlas), ayahs 1-4
-    audioUrls: quranAudio(112, 1, 2, 3, 4),
+    quranRefs: quranRefs(112, 1, 2, 3, 4),
     repeat: 1,
     onlyInRakaas: [1, 2],
   },
@@ -112,7 +111,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Allāhu Akbar',
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
-    audioUrls: null,
+    quranRefs: null,
     localAudio: 'takbir',
     repeat: 1,
   },
@@ -127,7 +126,7 @@ export const PRAYER_STEPS = [
     transliteration: "Subhāna rabbiyal 'azīm",
     translation: 'Gloria a mi Señor, el Grandioso',
     audioKey: 'ruku_tasbih',
-    audioUrls: null,
+    quranRefs: null,
     localAudio: 'ruku',
     repeat: 3,
   },
@@ -142,7 +141,7 @@ export const PRAYER_STEPS = [
     transliteration: "Sami'a Llāhu liman hamidah",
     translation: 'Allah escucha a quien Le alaba',
     audioKey: 'tasmi',
-    audioUrls: null,
+    quranRefs: null,
     localAudio: 'sami',
     repeat: 1,
   },
@@ -157,7 +156,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Rabbanā wa laka l-hamd',
     translation: 'Señor nuestro, a Ti sea toda la alabanza',
     audioKey: 'tahmid',
-    audioUrls: null,
+    quranRefs: null,
     localAudio: 'rabbana',
     repeat: 1,
   },
@@ -172,7 +171,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Allāhu Akbar',
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
-    audioUrls: null,
+    quranRefs: null,
     localAudio: 'takbir',
     repeat: 1,
   },
@@ -187,7 +186,7 @@ export const PRAYER_STEPS = [
     transliteration: "Subhāna rabbiyal a'lā",
     translation: 'Gloria a mi Señor, el Altísimo',
     audioKey: 'sujud_tasbih',
-    audioUrls: null,
+    quranRefs: null,
     localAudio: 'sujud',
     repeat: 3,
   },
@@ -202,7 +201,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Rabbi ghfir lī',
     translation: 'Señor mío, perdóname',
     audioKey: 'jalsah',
-    audioUrls: null,
+    quranRefs: null,
     localAudio: 'jalsa',
     repeat: 1,
   },
@@ -217,7 +216,7 @@ export const PRAYER_STEPS = [
     transliteration: 'Allāhu Akbar',
     translation: 'Allah es el más Grande',
     audioKey: 'takbir',
-    audioUrls: null,
+    quranRefs: null,
     localAudio: 'takbir',
     repeat: 1,
   },
@@ -232,7 +231,7 @@ export const PRAYER_STEPS = [
     transliteration: "Subhāna rabbiyal a'lā",
     translation: 'Gloria a mi Señor, el Altísimo',
     audioKey: 'sujud_tasbih',
-    audioUrls: null,
+    quranRefs: null,
     localAudio: 'sujud',
     repeat: 3,
   },
@@ -250,7 +249,7 @@ export const PRAYER_STEPS = [
     translation:
       'Todos los saludos, oraciones y palabras buenas son para Allah. La paz sea contigo, oh Profeta, y la misericordia y bendiciones de Allah. La paz sea con nosotros y con los siervos virtuosos de Allah. Atestiguo que no hay dios sino Allah, y atestiguo que Muhammad es Su siervo y mensajero.',
     audioKey: 'tashahhud',
-    audioUrls: null,
+    quranRefs: null,
     repeat: 1,
     afterRakaa: 2,
     notLastRakaa: true,
@@ -267,7 +266,7 @@ export const PRAYER_STEPS = [
     transliteration: 'At-tahiyyātu lillāhi... (igual que el tashahhud intermedio)',
     translation: 'Igual que el tashahhud intermedio',
     audioKey: 'tashahhud',
-    audioUrls: null,
+    quranRefs: null,
     repeat: 1,
     lastRakaaOnly: true,
   },
@@ -285,7 +284,7 @@ export const PRAYER_STEPS = [
     translation:
       'Oh Allah, envía bendiciones sobre Muhammad y sobre la familia de Muhammad, como enviaste bendiciones sobre Ibrahim y la familia de Ibrahim. Ciertamente Tú eres Digno de alabanza, Glorioso.',
     audioKey: 'darood',
-    audioUrls: null,
+    quranRefs: null,
     repeat: 1,
     lastRakaaOnly: true,
   },
@@ -303,7 +302,7 @@ export const PRAYER_STEPS = [
     translation:
       'Oh Allah, me he hecho a mí mismo mucha injusticia y nadie perdona los pecados sino Tú, así que concédeme Tu perdón y ten misericordia de mí. Ciertamente Tú eres el Perdonador, el Misericordioso.',
     audioKey: 'dua_final',
-    audioUrls: null,
+    quranRefs: null,
     repeat: 1,
     lastRakaaOnly: true,
   },
@@ -318,7 +317,7 @@ export const PRAYER_STEPS = [
     transliteration: 'As-salāmu \'alaykum wa rahmatullāh',
     translation: 'La paz y misericordia de Allah sean con vosotros',
     audioKey: 'salam',
-    audioUrls: null,
+    quranRefs: null,
     repeat: 2,
   },
 ]

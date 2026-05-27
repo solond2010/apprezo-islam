@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { PRAYER_RAKAATS, getStepsForRakaa } from '../data/prayerData'
 import { useSettings } from '../context/SettingsContext'
+import { buildAyahUrl } from '../data/reciters'
 
 const PRAYERS = [
   { id: 'fajr',    label: 'Fajr',    desc: '2 rakaas', icon: Sunrise,  color: 'from-amber-400 to-orange-400' },
@@ -644,7 +645,7 @@ const StepCard = ({
    MAIN COMPONENT
 ───────────────────────────────────────── */
 export default function PrayerGuide({ onBack }) {
-  const { userGender } = useSettings()
+  const { userGender, reciter } = useSettings()
   const [selectedPrayer, setSelectedPrayer] = useState('fajr')
   const [lightboxStep, setLightboxStep] = useState(null)
 
@@ -688,18 +689,18 @@ export default function PrayerGuide({ onBack }) {
             url: buildLocalAudioUrl(step.localAudio, userGender),
           })
         }
-        if (step.audioUrls?.length > 0) {
+        if (step.quranRefs?.length > 0) {
           items.push({
             type: 'recitation',
             step,
             rakaa,
-            urls: step.audioUrls,
+            urls: step.quranRefs.map(([s, a]) => buildAyahUrl(reciter.path, s, a)),
           })
         }
       })
     })
     return items
-  }, [allStepsByRakaa, userGender])
+  }, [allStepsByRakaa, userGender, reciter])
 
   // Mapa stepId → índice del item (para que las cards sepan qué item es suyo)
   const itemIdxByStep = useMemo(() => {
@@ -832,6 +833,14 @@ export default function PrayerGuide({ onBack }) {
       audioRef.current.defaultPlaybackRate = speed
     }
   }, [speed])
+
+  // Si cambia el recitador mientras se reproduce un audio del Quran,
+  // paramos para que no quede colgado el src antiguo.
+  useEffect(() => {
+    stopAudio()
+    setCurrentItemIdx(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reciter.id])
 
   // ── Auto-scroll al paso activo cuando cambia ──────────────────────────
   // Cuando el audio pasa al siguiente item (avance automático o manual),
