@@ -401,14 +401,15 @@ function RakaaHeader({ rakaa, total }) {
 }
 
 /* ─────────────────────────────────────────
-   STEP CARD — rediseñada
+   STEP CARD — rediseño profesional
 ───────────────────────────────────────── */
-function StepCard({
+const StepCard = ({
   step, stepNumber, gender,
   localItemIdx, recitItemIdx,
   currentItemIdx, isPlaying,
   onPlayItem, onOpenLightbox,
-}) {
+  cardRef,
+}) => {
   const isLocalActive = localItemIdx !== null && currentItemIdx === localItemIdx
   const isRecitActive = recitItemIdx !== null && currentItemIdx === recitItemIdx
   const isAnyActive = isLocalActive || isRecitActive
@@ -421,62 +422,88 @@ function StepCard({
 
   return (
     <motion.div
+      ref={cardRef}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      className={`relative rounded-2xl mb-3 overflow-hidden transition-shadow ${
-        isAnyActive ? 'shadow-lg shadow-amber-300/40' : 'shadow-sm'
+      transition={{ duration: 0.25 }}
+      className={`relative rounded-3xl mb-3 overflow-hidden transition-all duration-300 ${
+        isAnyActive ? 'shadow-xl shadow-amber-300/50 scale-[1.01]' : 'shadow-sm'
       }`}
     >
-      {/* Borde brillante cuando está activo */}
+      {/* Glow exterior cuando está activo */}
       {isAnyActive && (
-        <div
-          className="absolute inset-0 rounded-2xl pointer-events-none"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute -inset-0.5 rounded-3xl pointer-events-none blur-lg"
           style={{
-            padding: 2,
             background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)',
-            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            WebkitMaskComposite: 'xor',
-            maskComposite: 'exclude',
+            opacity: 0.4,
           }}
         />
       )}
 
-      <div className="relative bg-white/85 backdrop-blur-md border border-white/70 rounded-2xl px-4 pt-4 pb-4">
-        {/* Header: número + título + repetir */}
-        <div className="flex items-center justify-between mb-1">
-          <div
-            className="flex items-center justify-center w-8 h-8 rounded-xl text-white text-[11px] font-black shadow-sm"
-            style={{ background: 'linear-gradient(135deg, #FBBF24, #F59E0B)' }}
-          >
-            {stepNumber}
-          </div>
-          {step.repeat > 1 && (
-            <span
-              className="text-[10px] font-black text-white px-2 py-0.5 rounded-full shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #F59E0B, #EA580C)' }}
+      <div
+        className="relative rounded-3xl overflow-hidden"
+        style={{
+          background: isAnyActive
+            ? 'linear-gradient(180deg, rgba(254,243,199,0.95) 0%, rgba(255,255,255,0.95) 100%)'
+            : 'rgba(255,255,255,0.85)',
+          backdropFilter: 'blur(14px)',
+          border: isAnyActive ? '1.5px solid rgba(245,158,11,0.4)' : '1px solid rgba(255,255,255,0.7)',
+        }}
+      >
+        {/* ─── Header con número grande a la izquierda ─── */}
+        <div className="flex items-start gap-3 px-5 pt-5 pb-2">
+          <div className="relative flex-shrink-0">
+            <div
+              className="flex items-center justify-center w-11 h-11 rounded-2xl text-white text-base font-black shadow-md"
+              style={{ background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)' }}
             >
-              ×{step.repeat}
-            </span>
+              {stepNumber}
+            </div>
+            {step.repeat > 1 && (
+              <div
+                className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-full text-white text-[9px] font-black shadow-sm border-2 border-white"
+                style={{ background: '#EA580C' }}
+              >
+                ×{step.repeat}
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0 pt-0.5">
+            <h3 className="text-base font-black text-gray-800 leading-tight">{step.name}</h3>
+            <p className="text-sm text-amber-700 font-bold mt-0.5" dir="rtl">
+              {step.nameAr}
+            </p>
+          </div>
+
+          {/* Indicador "reproduciendo" */}
+          {isAnyActive && isPlaying && (
+            <motion.div
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ duration: 1.2, repeat: Infinity }}
+              className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+              style={{ background: 'linear-gradient(135deg, #FBBF24, #EA580C)' }}
+            >
+              <Volume2 size={14} className="text-white" />
+            </motion.div>
           )}
         </div>
 
-        {/* Título */}
-        <h3 className="text-base font-black text-gray-800 text-center mt-2">{step.name}</h3>
-        <p className="text-xs text-amber-700 font-semibold text-center mb-3" dir="rtl">
-          {step.nameAr}
-        </p>
-
-        {/* Imagen */}
+        {/* ─── Imagen ─── */}
         {hasImage && (
           <button
             onClick={() => onOpenLightbox(step)}
-            className="w-full flex flex-col items-center mb-3 group active:scale-[0.98] transition-transform"
+            className="w-full flex flex-col items-center px-5 pt-3 group active:scale-[0.98] transition-transform"
           >
             {isSalam ? (
               <div className="flex gap-3 items-end justify-center w-full">
-                <div className="flex-1 max-w-[140px] rounded-2xl overflow-hidden bg-amber-50/80 border border-amber-200/60 shadow-sm"
-                  style={{ aspectRatio: '3/4' }}>
+                <div
+                  className="flex-1 max-w-[140px] rounded-2xl overflow-hidden border-2 shadow-md"
+                  style={{ aspectRatio: '3/4', background: '#FFFBF2', borderColor: 'rgba(251,191,36,0.3)' }}
+                >
                   <img
                     src={`${GENDER_FOLDERS[gender] || GENDER_FOLDERS.hombre}/taslim1.png`}
                     alt="Taslim derecha"
@@ -484,8 +511,10 @@ function StepCard({
                     onError={(e) => { if (gender !== 'hombre') e.currentTarget.src = `${GENDER_FOLDERS.hombre}/taslim1.png` }}
                   />
                 </div>
-                <div className="flex-1 max-w-[140px] rounded-2xl overflow-hidden bg-amber-50/80 border border-amber-200/60 shadow-sm"
-                  style={{ aspectRatio: '3/4' }}>
+                <div
+                  className="flex-1 max-w-[140px] rounded-2xl overflow-hidden border-2 shadow-md"
+                  style={{ aspectRatio: '3/4', background: '#FFFBF2', borderColor: 'rgba(251,191,36,0.3)' }}
+                >
                   <img
                     src={`${GENDER_FOLDERS[gender] || GENDER_FOLDERS.hombre}/taslim2.png`}
                     alt="Taslim izquierda"
@@ -496,8 +525,8 @@ function StepCard({
               </div>
             ) : (
               <div
-                className="w-full max-w-[200px] rounded-2xl overflow-hidden bg-amber-50/80 border border-amber-200/60 shadow-sm"
-                style={{ aspectRatio: '3/4' }}
+                className="w-full max-w-[200px] rounded-2xl overflow-hidden border-2 shadow-md relative"
+                style={{ aspectRatio: '3/4', background: '#FFFBF2', borderColor: 'rgba(251,191,36,0.3)' }}
               >
                 <img
                   src={stepImgUrl}
@@ -505,80 +534,107 @@ function StepCard({
                   className="w-full h-full object-contain p-3"
                   onError={(e) => { if (fallbackImg && gender !== 'hombre') e.currentTarget.src = fallbackImg }}
                 />
+                {/* Botón flotante de ampliar */}
+                <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 shadow-sm flex items-center justify-center backdrop-blur-md">
+                  <ZoomIn size={13} className="text-amber-600" />
+                </div>
               </div>
             )}
-
-            <div className="flex items-center gap-1 mt-2 opacity-60 group-active:opacity-100 transition-opacity">
-              <ZoomIn size={11} className="text-amber-600" />
-              <span className="text-[10px] text-amber-600 font-bold uppercase tracking-wide">Ampliar</span>
-            </div>
           </button>
         )}
 
-        {/* Descripción */}
-        <p className="text-xs text-gray-600 leading-relaxed text-center">{step.description}</p>
-        {step.instruction && (
-          <p className="text-[11px] text-gray-400 leading-relaxed mt-1 italic text-center">{step.instruction}</p>
-        )}
+        {/* ─── Descripción ─── */}
+        <div className="px-5 pt-3 pb-1">
+          <p className="text-sm text-gray-700 leading-relaxed text-center">{step.description}</p>
+          {step.instruction && (
+            <p className="text-xs text-gray-500 leading-relaxed mt-1.5 italic text-center">
+              {step.instruction}
+            </p>
+          )}
+        </div>
 
-        {/* Nota */}
+        {/* ─── Nota destacada ─── */}
         {step.note && (
-          <div className="mt-3 bg-amber-50 border border-amber-200/60 rounded-xl px-3 py-2">
-            <p className="text-xs text-amber-800 leading-relaxed">💡 {step.note}</p>
+          <div className="mx-5 mt-3 rounded-xl px-3.5 py-2.5 flex items-start gap-2"
+            style={{ background: 'linear-gradient(135deg, #FEF3C7, #FDE68A)', border: '1px solid rgba(245,158,11,0.25)' }}
+          >
+            <span className="text-base flex-shrink-0">💡</span>
+            <p className="text-xs text-amber-900 leading-relaxed font-medium">{step.note}</p>
           </div>
         )}
 
-        {/* Texto árabe */}
+        {/* ─── Texto árabe con marco decorado ─── */}
         {step.arabic && (
-          <div className="border-t border-amber-100 pt-3 mt-3 space-y-2">
+          <div className="mx-5 mt-4 rounded-2xl px-4 py-4 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(254,243,199,0.5), rgba(254,215,170,0.4))',
+              border: '1px solid rgba(245,158,11,0.2)',
+            }}
+          >
+            {/* Decoración esquinas */}
+            <div className="absolute -top-2 -right-2 w-12 h-12 rounded-full opacity-30 pointer-events-none"
+              style={{ background: 'radial-gradient(circle, #FBBF24 0%, transparent 70%)' }} />
+
             <p
-              className="text-xl leading-loose text-amber-900 text-right"
+              className="text-2xl leading-loose text-amber-900 text-right font-medium relative z-10"
               dir="rtl"
               lang="ar"
             >
               {step.arabic}
             </p>
+
             {step.transliteration && (
-              <p className="text-xs text-amber-700 italic font-medium leading-relaxed">
-                {step.transliteration}
-              </p>
+              <>
+                <div className="h-px bg-amber-200/60 my-2.5" />
+                <p className="text-xs text-amber-800 italic font-semibold leading-relaxed">
+                  {step.transliteration}
+                </p>
+              </>
             )}
-            <p className="text-xs text-gray-500 leading-relaxed">{step.translation}</p>
+
+            {step.translation && (
+              <>
+                <div className="h-px bg-amber-200/60 my-2.5" />
+                <p className="text-xs text-gray-700 leading-relaxed">{step.translation}</p>
+              </>
+            )}
           </div>
         )}
 
-        {/* Botones de audio */}
-        <div className="mt-4 flex flex-col gap-2">
-          {localItemIdx !== null && (
-            <button
-              onClick={() => onPlayItem(localItemIdx)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white shadow-sm active:scale-[0.97] transition-transform"
-              style={{
-                background: isLocalActive
-                  ? 'linear-gradient(135deg, #EA580C, #C2410C)'
-                  : 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)',
-              }}
-            >
-              {isLocalActive && isPlaying ? <Pause size={15} /> : <Mic size={15} />}
-              {isLocalActive && isPlaying ? 'Pausar pronunciación' : 'Escuchar pronunciación'}
-            </button>
-          )}
+        {/* ─── Botones de audio (compactos lado a lado si ambos existen) ─── */}
+        {(localItemIdx !== null || recitItemIdx !== null) && (
+          <div className={`px-5 mt-4 mb-5 flex gap-2 ${localItemIdx !== null && recitItemIdx !== null ? '' : ''}`}>
+            {localItemIdx !== null && (
+              <button
+                onClick={() => onPlayItem(localItemIdx)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-black text-white shadow-md active:scale-[0.97] transition-transform"
+                style={{
+                  background: isLocalActive
+                    ? 'linear-gradient(135deg, #C2410C, #9A3412)'
+                    : 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)',
+                }}
+              >
+                {isLocalActive && isPlaying ? <Pause size={14} /> : <Mic size={14} />}
+                <span>{isLocalActive && isPlaying ? 'Pausar' : 'Pronunciación'}</span>
+              </button>
+            )}
 
-          {recitItemIdx !== null && (
-            <button
-              onClick={() => onPlayItem(recitItemIdx)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white shadow-sm active:scale-[0.97] transition-transform"
-              style={{
-                background: isRecitActive
-                  ? 'linear-gradient(135deg, #EA580C, #C2410C)'
-                  : 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)',
-              }}
-            >
-              {isRecitActive && isPlaying ? <Pause size={15} /> : <Volume2 size={15} />}
-              {isRecitActive && isPlaying ? 'Pausar recitación' : 'Escuchar recitación'}
-            </button>
-          )}
-        </div>
+            {recitItemIdx !== null && (
+              <button
+                onClick={() => onPlayItem(recitItemIdx)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-black text-white shadow-md active:scale-[0.97] transition-transform"
+                style={{
+                  background: isRecitActive
+                    ? 'linear-gradient(135deg, #C2410C, #9A3412)'
+                    : 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)',
+                }}
+              >
+                {isRecitActive && isPlaying ? <Pause size={14} /> : <Volume2 size={14} />}
+                <span>{isRecitActive && isPlaying ? 'Pausar' : 'Recitación'}</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </motion.div>
   )
@@ -598,6 +654,10 @@ export default function PrayerGuide({ onBack }) {
   const [speed, setSpeed] = useState(1)
   const audioRef = useRef(null)
   const sequenceRef = useRef(null)
+
+  // Refs por tarjeta: key = `${rakaa}-${step.id}` → elemento DOM
+  // Permite hacer scroll automático al paso activo cuando el audio avanza.
+  const cardRefs = useRef({})
 
   const totalRakaas = PRAYER_RAKAATS[selectedPrayer]
 
@@ -773,6 +833,24 @@ export default function PrayerGuide({ onBack }) {
     }
   }, [speed])
 
+  // ── Auto-scroll al paso activo cuando cambia ──────────────────────────
+  // Cuando el audio pasa al siguiente item (avance automático o manual),
+  // hacemos scroll suave para que la card quede centrada en pantalla.
+  useEffect(() => {
+    if (currentItemIdx === null) return
+    const item = playableItems[currentItemIdx]
+    if (!item) return
+    const key = `${item.rakaa}-${item.step.id}`
+    const el = cardRefs.current[key]
+    if (el && typeof el.scrollIntoView === 'function') {
+      // Usamos un pequeño delay para que la transición visual de "activo"
+      // se renderice antes del scroll, queda más natural.
+      requestAnimationFrame(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    }
+  }, [currentItemIdx, playableItems])
+
   useEffect(() => () => stopAudio(), [])
 
   const currentItem = currentItemIdx !== null ? playableItems[currentItemIdx] : null
@@ -796,30 +874,39 @@ export default function PrayerGuide({ onBack }) {
       </div>
 
       {/* Título */}
-      <div className="mb-6 px-1">
+      <div className="mb-5 px-1">
         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
           Guía completa
         </p>
         <h1 className="text-2xl font-black text-gray-800 mt-0.5">Paso a Paso</h1>
-        <p className="text-xs text-gray-500 mt-1">
-          {PRAYERS.find(p => p.id === selectedPrayer)?.label} · {totalRakaas} rakaas · {playableItems.length} audios
-        </p>
+        <div className="flex items-center gap-2 mt-1.5">
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <span className="font-bold text-amber-700">{PRAYERS.find(p => p.id === selectedPrayer)?.label}</span>
+            <span className="text-gray-300">•</span>
+            <span>{totalRakaas} rakaas</span>
+            <span className="text-gray-300">•</span>
+            <span>{playableItems.length} audios</span>
+          </div>
+        </div>
       </div>
 
-      {/* Banner motivacional */}
+      {/* Banner hero con motivo decorativo */}
       <div
-        className="relative rounded-3xl px-5 py-4 mb-5 overflow-hidden shadow-md"
+        className="relative rounded-3xl px-5 py-5 mb-6 overflow-hidden shadow-lg"
         style={{ background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)' }}
       >
-        <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/15 pointer-events-none" />
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-white/25 flex items-center justify-center flex-shrink-0">
-            <Volume2 size={20} className="text-white" strokeWidth={2.3} />
+        {/* Decoraciones */}
+        <div className="absolute -top-10 -right-8 w-40 h-40 rounded-full bg-white/15 pointer-events-none" />
+        <div className="absolute -bottom-8 -left-4 w-24 h-24 rounded-full bg-white/10 pointer-events-none" />
+
+        <div className="relative z-10 flex items-start gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+            <Volume2 size={22} className="text-white" strokeWidth={2.3} />
           </div>
-          <div>
-            <p className="text-white font-black text-sm">Aprende rezando</p>
-            <p className="text-white/85 text-[11px] leading-tight mt-0.5">
-              Toca cualquier paso para escuchar la pronunciación o la recitación
+          <div className="flex-1">
+            <p className="text-white font-black text-base leading-tight">Aprende rezando</p>
+            <p className="text-white/90 text-xs leading-relaxed mt-1">
+              Toca cualquier paso para escuchar. El audio avanza automáticamente y la pantalla te sigue.
             </p>
           </div>
         </div>
@@ -835,9 +922,10 @@ export default function PrayerGuide({ onBack }) {
             const localItemIdx = itemIdxByStep.has(localKey) ? itemIdxByStep.get(localKey) : null
             const recitItemIdx = itemIdxByStep.has(recitKey) ? itemIdxByStep.get(recitKey) : null
 
+            const cardKey = `${rakaa}-${step.id}`
             return (
               <StepCard
-                key={`${rakaa}-${step.id}`}
+                key={cardKey}
                 step={step}
                 stepNumber={stepNumbers[rakaaIdx][stepIdx]}
                 gender={userGender}
@@ -847,6 +935,7 @@ export default function PrayerGuide({ onBack }) {
                 isPlaying={isPlaying}
                 onPlayItem={handlePlayItem}
                 onOpenLightbox={setLightboxStep}
+                cardRef={(el) => { cardRefs.current[cardKey] = el }}
               />
             )
           })}
