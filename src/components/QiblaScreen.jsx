@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useSettings } from '../context/SettingsContext'
 
 const MECCA = { lat: 21.4225, lng: 39.8262 }
 
@@ -238,20 +239,23 @@ function QiblaVerse() {
 }
 
 export default function QiblaScreen({ latitude, longitude, onBack }) {
+  const { darkMode } = useSettings()
   return (
     <div className="pt-4 pb-4">
       <div className="flex items-center gap-3 mb-5 px-1">
         <button
           onClick={onBack}
-          className="w-10 h-10 rounded-2xl bg-white/70 backdrop-blur-md border border-white/60 shadow-sm flex items-center justify-center text-amber-600 font-bold text-xl active:scale-90 transition-transform"
+          className={`w-10 h-10 rounded-2xl backdrop-blur-md border shadow-sm flex items-center justify-center text-amber-600 font-bold text-xl active:scale-90 transition-transform ${
+            darkMode ? 'bg-[#1e1e1e]/70 border-[#2a2a2a]' : 'bg-white/70 border-white/60'
+          }`}
         >
           ←
         </button>
         <div>
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+          <p className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             Dirección
           </p>
-          <h1 className="text-xl font-black text-gray-800">Brújula Qibla</h1>
+          <h1 className={`text-xl font-black ${darkMode ? 'text-white' : 'text-gray-800'}`}>Brújula Qibla</h1>
         </div>
       </div>
 

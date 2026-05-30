@@ -645,7 +645,7 @@ const StepCard = ({
    MAIN COMPONENT
 ───────────────────────────────────────── */
 export default function PrayerGuide({ onBack }) {
-  const { userGender, reciter } = useSettings()
+  const { userGender, reciter, darkMode } = useSettings()
   const [selectedPrayer, setSelectedPrayer] = useState('fajr')
   const [lightboxStep, setLightboxStep] = useState(null)
 
@@ -873,27 +873,29 @@ export default function PrayerGuide({ onBack }) {
       <div className="flex items-start justify-between mb-4 gap-3">
         <button
           onClick={() => { stopAudio(); onBack() }}
-          className="flex items-center gap-1 text-sm text-gray-600 active:scale-95 transition-transform px-2 py-1.5 rounded-xl active:bg-white/50"
+          className={`flex items-center gap-1 text-sm active:scale-95 transition-transform px-2 py-1.5 rounded-xl ${
+            darkMode ? 'text-gray-300 active:bg-white/10' : 'text-gray-600 active:bg-white/50'
+          }`}
         >
           <ChevronLeft size={18} />
           <span className="font-semibold">Volver</span>
         </button>
 
-        <PrayerDropdown selected={selectedPrayer} onSelect={handlePrayerChange} />
+        <PrayerDropdown selected={selectedPrayer} onSelect={handlePrayerChange} darkMode={darkMode} />
       </div>
 
       {/* Título */}
       <div className="mb-5 px-1">
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+        <p className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           Guía completa
         </p>
-        <h1 className="text-2xl font-black text-gray-800 mt-0.5">Paso a Paso</h1>
+        <h1 className={`text-2xl font-black mt-0.5 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Paso a Paso</h1>
         <div className="flex items-center gap-2 mt-1.5">
-          <div className="flex items-center gap-1 text-xs text-gray-500">
-            <span className="font-bold text-amber-700">{PRAYERS.find(p => p.id === selectedPrayer)?.label}</span>
-            <span className="text-gray-300">•</span>
+          <div className={`flex items-center gap-1 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            <span className={`font-bold ${darkMode ? 'text-amber-400' : 'text-amber-700'}`}>{PRAYERS.find(p => p.id === selectedPrayer)?.label}</span>
+            <span className="text-gray-400">•</span>
             <span>{totalRakaas} rakaas</span>
-            <span className="text-gray-300">•</span>
+            <span className="text-gray-400">•</span>
             <span>{playableItems.length} audios</span>
           </div>
         </div>
@@ -953,10 +955,10 @@ export default function PrayerGuide({ onBack }) {
 
       {/* Footer */}
       <div className="mt-6 text-center">
-        <p className="text-xs text-gray-500 leading-relaxed font-semibold">
+        <p className={`text-xs leading-relaxed font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           Taqabbal Allahu minna wa minkum
         </p>
-        <p className="text-[10px] text-gray-400 mt-1">Que Allah acepte nuestros rezos</p>
+        <p className={`text-[10px] mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>Que Allah acepte nuestros rezos</p>
       </div>
 
       {/* Lightbox */}
