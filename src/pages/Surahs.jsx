@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronRight, ArrowLeft, Play, Pause,
   SkipBack, SkipForward, BookOpen, X, ChevronUp, Search, Loader2,
+  Star, BookMarked,
 } from 'lucide-react'
 import { useSettings } from '../context/SettingsContext'
 import { buildAyahUrl } from '../data/reciters'
@@ -149,7 +150,7 @@ function MiniPlayer({ surah, currentAyah, isPlaying, speed, onPlayPause, onPrev,
 
 // ── Detalle de surah ──────────────────────────────────────────────────────
 
-function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
+function SurahDetail({ surah, onBack, fontSize, darkMode, reciter, isFav, onToggleFav }) {
   const [currentAyah, setCurrentAyah] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
@@ -320,6 +321,19 @@ function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
               {surah.nameAr} · {surah.meaning} · {surah.ayahs} ayahs
             </p>
           </div>
+          {/* Favorito */}
+          <button
+            onClick={onToggleFav}
+            className="w-9 h-9 rounded-xl flex items-center justify-center active:scale-90 transition-transform"
+            aria-label={isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+          >
+            <Star
+              size={20}
+              className={isFav ? 'text-amber-500' : darkMode ? 'text-gray-500' : 'text-gray-300'}
+              fill={isFav ? '#F59E0B' : 'none'}
+              strokeWidth={2.2}
+            />
+          </button>
           {/* Reproducir todo */}
           <button
             onClick={() => { stopAudio(); setTimeout(() => playFrom(0), 40) }}
@@ -521,9 +535,66 @@ function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
   )
 }
 
+// ── Fila de surah (reutilizable) ──────────────────────────────────────────
+
+function SurahRow({ s, i, darkMode, reciter, isFav, onToggleFav, onSelect }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: Math.min(i, 12) * 0.03 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={() => onSelect(s)}
+      className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl shadow-sm border text-left cursor-pointer transition-colors ${
+        darkMode
+          ? 'bg-[#1e1e1e]/70 backdrop-blur-md border-[#2a2a2a] active:bg-[#2a2a2a]'
+          : 'bg-white/70 backdrop-blur-md border-white/60 active:bg-white/90'
+      }`}
+    >
+      {/* Número */}
+      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+        <span className="text-sm font-black text-white tabular-nums">{s.num}</span>
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2">
+          <p className={`text-base font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{s.name}</p>
+          <span className={`text-xs truncate ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{s.meaning}</span>
+        </div>
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+            {s.ayahs} ayahs
+          </span>
+          <span className={`text-[10px] ${darkMode ? 'text-gray-600' : 'text-gray-300'}`}>·</span>
+          <span className={`text-xl leading-none ${darkMode ? 'text-gray-300' : 'text-amber-700'}`} dir="rtl">
+            {s.nameAr}
+          </span>
+        </div>
+      </div>
+
+      {/* Estrella favorito */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onToggleFav(s.num) }}
+        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 active:scale-90 transition-transform"
+        aria-label={isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+      >
+        <Star
+          size={19}
+          className={isFav ? 'text-amber-500' : darkMode ? 'text-gray-600' : 'text-gray-300'}
+          fill={isFav ? '#F59E0B' : 'none'}
+          strokeWidth={2.2}
+        />
+      </button>
+
+      <ChevronRight size={16} className={`flex-shrink-0 ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} />
+    </motion.div>
+  )
+}
+
 // ── Lista de surahs ───────────────────────────────────────────────────────
 
-function SurahList({ onSelect, darkMode, reciter }) {
+function SurahList({ onSelect, darkMode, reciter, favorites, onToggleFav, lastRead }) {
   const [query, setQuery] = useState('')
 
   const filtered = useMemo(() => {
@@ -536,6 +607,17 @@ function SurahList({ onSelect, darkMode, reciter }) {
       String(s.num) === q
     )
   }, [query])
+
+  const favSurahs = useMemo(
+    () => SURAHS.filter((s) => favorites.includes(s.num)),
+    [favorites]
+  )
+  const lastReadSurah = useMemo(
+    () => (lastRead ? SURAHS.find((s) => s.num === lastRead) : null),
+    [lastRead]
+  )
+
+  const searching = query.trim().length > 0
 
   return (
     <motion.div
@@ -597,64 +679,74 @@ function SurahList({ onSelect, darkMode, reciter }) {
         )}
       </div>
 
-      {/* Lista */}
-      <div className="flex flex-col gap-2.5">
-        {filtered.map((s, i) => (
-          <motion.button
-            key={s.num}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: Math.min(i, 12) * 0.03 }}
+      {/* Continuar leyendo — solo si no se está buscando */}
+      {!searching && lastReadSurah && (
+        <div className="mb-5">
+          <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 px-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            Continuar leyendo
+          </p>
+          <motion.div
             whileTap={{ scale: 0.98 }}
-            onClick={() => onSelect(s)}
-            className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl shadow-sm border text-left transition-colors ${
-              darkMode
-                ? 'bg-[#1e1e1e]/70 backdrop-blur-md border-[#2a2a2a] active:bg-[#2a2a2a]'
-                : 'bg-white/70 backdrop-blur-md border-white/60 active:bg-white/90'
-            }`}
+            onClick={() => onSelect(lastReadSurah)}
+            className="relative rounded-2xl px-4 py-4 overflow-hidden shadow-md cursor-pointer flex items-center gap-3"
+            style={{ background: 'linear-gradient(135deg, #431407 0%, #7C2D12 50%, #C2410C 100%)' }}
           >
-            {/* Número */}
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
-              <span className="text-sm font-black text-white tabular-nums">{s.num}</span>
+            <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10 pointer-events-none" />
+            <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0">
+              <BookMarked size={20} className="text-amber-200" />
             </div>
-
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-2">
-                <p className={`text-base font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{s.name}</p>
-                <span className={`text-xs truncate ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{s.meaning}</span>
-              </div>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                  {s.ayahs} ayahs
-                </span>
-                <span className={`text-[10px] ${darkMode ? 'text-gray-600' : 'text-gray-300'}`}>·</span>
-                <div className="flex items-center gap-1">
-                  <Play size={9} className="text-amber-500" />
-                  <span className={`text-[10px] font-semibold ${darkMode ? 'text-amber-500' : 'text-amber-600'}`}>
-                    {reciter?.name || 'Al-Sudais'}
-                  </span>
-                </div>
-              </div>
+            <div className="flex-1 min-w-0 relative z-10">
+              <p className="text-base font-black text-white">{lastReadSurah.name}</p>
+              <p className="text-xs text-white/70">{lastReadSurah.meaning} · {lastReadSurah.ayahs} ayahs</p>
             </div>
+            <span className="text-2xl text-amber-200/80 font-light relative z-10" dir="rtl">{lastReadSurah.nameAr}</span>
+          </motion.div>
+        </div>
+      )}
 
-            {/* Árabe + flecha */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span className={`text-xl ${darkMode ? 'text-gray-300' : 'text-amber-700'}`} dir="rtl">
-                {s.nameAr}
-              </span>
-              <ChevronRight size={16} className={darkMode ? 'text-gray-600' : 'text-gray-300'} />
-            </div>
-          </motion.button>
-        ))}
-
-        {filtered.length === 0 && (
-          <div className="py-16 text-center">
-            <p className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              No se encontró ninguna surah para «{query}»
+      {/* Favoritos — solo si hay y no se está buscando */}
+      {!searching && favSurahs.length > 0 && (
+        <div className="mb-5">
+          <div className="flex items-center gap-1.5 mb-2 px-1">
+            <Star size={12} className="text-amber-500" fill="#F59E0B" />
+            <p className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              Favoritos · {favSurahs.length}
             </p>
           </div>
+          <div className="flex flex-col gap-2.5">
+            {favSurahs.map((s, i) => (
+              <SurahRow
+                key={s.num} s={s} i={i} darkMode={darkMode} reciter={reciter}
+                isFav onToggleFav={onToggleFav} onSelect={onSelect}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Lista completa */}
+      <div>
+        {!searching && (
+          <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 px-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            Todas las surahs
+          </p>
         )}
+        <div className="flex flex-col gap-2.5">
+          {filtered.map((s, i) => (
+            <SurahRow
+              key={s.num} s={s} i={i} darkMode={darkMode} reciter={reciter}
+              isFav={favorites.includes(s.num)} onToggleFav={onToggleFav} onSelect={onSelect}
+            />
+          ))}
+
+          {filtered.length === 0 && (
+            <div className="py-16 text-center">
+              <p className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                No se encontró ninguna surah para «{query}»
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   )
@@ -664,13 +756,29 @@ function SurahList({ onSelect, darkMode, reciter }) {
 
 export default function Surahs() {
   const [selected, setSelected] = useState(null)
-  const { fontSize, darkMode, reciter } = useSettings()
+  const {
+    fontSize, darkMode, reciter,
+    favoriteSurahs, toggleFavorite, lastReadSurah, setLastReadSurah,
+  } = useSettings()
+
+  function handleSelect(s) {
+    setSelected(s)
+    setLastReadSurah(s.num)
+  }
 
   return (
     <div className="pt-0 pb-2">
       <AnimatePresence mode="wait">
         {selected === null ? (
-          <SurahList key="list" onSelect={setSelected} darkMode={darkMode} reciter={reciter} />
+          <SurahList
+            key="list"
+            onSelect={handleSelect}
+            darkMode={darkMode}
+            reciter={reciter}
+            favorites={favoriteSurahs}
+            onToggleFav={toggleFavorite}
+            lastRead={lastReadSurah}
+          />
         ) : (
           <SurahDetail
             key={`surah-${selected.num}`}
@@ -679,6 +787,8 @@ export default function Surahs() {
             fontSize={fontSize}
             darkMode={darkMode}
             reciter={reciter}
+            isFav={favoriteSurahs.includes(selected.num)}
+            onToggleFav={() => toggleFavorite(selected.num)}
           />
         )}
       </AnimatePresence>

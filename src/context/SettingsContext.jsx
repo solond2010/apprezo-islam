@@ -46,6 +46,28 @@ export function SettingsProvider({ children }) {
 
   const reciter = useMemo(() => getReciter(reciterId), [reciterId])
 
+  // favoriteSurahs: array de números de surah marcados como favoritos.
+  const [favoriteSurahs, setFavoriteSurahs] = useState(() => {
+    try {
+      const saved = localStorage.getItem('rezar-fav-surahs')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  // lastReadSurah: número de la última surah abierta (para "Continuar leyendo").
+  const [lastReadSurah, setLastReadSurah] = useState(() => {
+    const saved = localStorage.getItem('rezar-last-surah')
+    return saved ? Number(saved) : null
+  })
+
+  function toggleFavorite(num) {
+    setFavoriteSurahs((prev) =>
+      prev.includes(num) ? prev.filter((n) => n !== num) : [...prev, num]
+    )
+  }
+
   useEffect(() => {
     localStorage.setItem('rezar-font-size', String(fontSize))
   }, [fontSize])
@@ -67,6 +89,16 @@ export function SettingsProvider({ children }) {
     localStorage.setItem('rezar-reciter', reciterId)
   }, [reciterId])
 
+  useEffect(() => {
+    localStorage.setItem('rezar-fav-surahs', JSON.stringify(favoriteSurahs))
+  }, [favoriteSurahs])
+
+  useEffect(() => {
+    if (lastReadSurah != null) {
+      localStorage.setItem('rezar-last-surah', String(lastReadSurah))
+    }
+  }, [lastReadSurah])
+
   function increaseFont() {
     setFontSize((s) => Math.min(s + 2, 40))
   }
@@ -82,6 +114,8 @@ export function SettingsProvider({ children }) {
       userGender, setUserGender,
       userLocation, setUserLocation,
       reciterId, setReciterId, reciter,
+      favoriteSurahs, toggleFavorite,
+      lastReadSurah, setLastReadSurah,
     }}>
       {children}
     </SettingsContext.Provider>
