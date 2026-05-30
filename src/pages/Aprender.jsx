@@ -722,7 +722,7 @@ const CAT_STYLES = {
 
 // ── Pantalla de detalle ────────────────────────────────────────────────────
 
-function TopicDetail({ topic, onBack, darkMode }) {
+function TopicDetail({ topic, onBack, darkMode, isFav, onToggleFav }) {
   const Icon = topic.icon
   const style = CAT_STYLES[topic.category] || CAT_STYLES.fundamentos
 
@@ -756,6 +756,18 @@ function TopicDetail({ topic, onBack, darkMode }) {
             {topic.title}
           </h2>
         </div>
+        <button
+          onClick={onToggleFav}
+          className="p-2 rounded-xl active:scale-90 transition-transform flex-shrink-0"
+          aria-label={isFav ? 'Quitar de guardados' : 'Guardar'}
+        >
+          <Star
+            size={20}
+            className={isFav ? 'text-amber-500' : darkMode ? 'text-gray-500' : 'text-gray-300'}
+            fill={isFav ? '#F59E0B' : 'none'}
+            strokeWidth={2.2}
+          />
+        </button>
       </div>
 
       {/* Icon + subtitle hero */}
@@ -842,18 +854,18 @@ function TopicDetail({ topic, onBack, darkMode }) {
 
 // ── Tarjeta de lista ───────────────────────────────────────────────────────
 
-function TopicCard({ topic, onOpen, darkMode, index }) {
+function TopicCard({ topic, onOpen, darkMode, index, isFav, onToggleFav }) {
   const Icon = topic.icon
   const style = CAT_STYLES[topic.category] || CAT_STYLES.fundamentos
 
   return (
-    <motion.button
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.025 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onOpen(topic)}
-      className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl shadow-sm border text-left transition-colors ${
+      className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl shadow-sm border text-left cursor-pointer transition-colors ${
         darkMode
           ? 'bg-[#1e1e1e]/70 backdrop-blur-md border-[#2a2a2a] active:bg-[#2a2a2a]'
           : 'bg-white/70 backdrop-blur-md border-white/60 active:bg-white/90'
@@ -870,10 +882,19 @@ function TopicCard({ topic, onOpen, darkMode, index }) {
           {topic.subtitle}
         </p>
       </div>
-      <div className={`flex-shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide ${style.pill}`}>
-        {CATEGORIES.find(c => c.id === topic.category)?.label}
-      </div>
-    </motion.button>
+      <button
+        onClick={(e) => { e.stopPropagation(); onToggleFav(topic.id) }}
+        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 active:scale-90 transition-transform"
+        aria-label={isFav ? 'Quitar de guardados' : 'Guardar'}
+      >
+        <Star
+          size={17}
+          className={isFav ? 'text-amber-500' : darkMode ? 'text-gray-600' : 'text-gray-300'}
+          fill={isFav ? '#F59E0B' : 'none'}
+          strokeWidth={2.2}
+        />
+      </button>
+    </motion.div>
   )
 }
 
@@ -883,14 +904,22 @@ export default function Aprender() {
   const [search, setSearch] = useState('')
   const [activeCat, setActiveCat] = useState('all')
   const [selected, setSelected] = useState(null)
-  const { darkMode } = useSettings()
+  const { darkMode, favoriteTopics, toggleFavoriteTopic } = useSettings()
 
   const filtered = topics.filter((t) => {
-    const matchCat = activeCat === 'all' || t.category === activeCat
+    const matchCat =
+      activeCat === 'all' ? true :
+      activeCat === 'saved' ? favoriteTopics.includes(t.id) :
+      t.category === activeCat
     const q = search.toLowerCase()
     const matchSearch = !q || t.title.toLowerCase().includes(q) || t.subtitle.toLowerCase().includes(q)
     return matchCat && matchSearch
   })
+
+  // "Guardados" se inserta como primer filtro solo si hay favoritos
+  const catFilters = favoriteTopics.length > 0
+    ? [CATEGORIES[0], { id: 'saved', label: '★ Guardados' }, ...CATEGORIES.slice(1)]
+    : CATEGORIES
 
   return (
     <div className="pt-0 pb-2">
@@ -901,6 +930,8 @@ export default function Aprender() {
             topic={selected}
             onBack={() => setSelected(null)}
             darkMode={darkMode}
+            isFav={favoriteTopics.includes(selected.id)}
+            onToggleFav={() => toggleFavoriteTopic(selected.id)}
           />
         ) : (
           <motion.div
@@ -942,7 +973,7 @@ export default function Aprender() {
 
             {/* Filtros de categoría */}
             <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4 mb-5">
-              {CATEGORIES.map((cat) => (
+              {catFilters.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setActiveCat(cat.id)}
@@ -981,6 +1012,8 @@ export default function Aprender() {
                     onOpen={setSelected}
                     darkMode={darkMode}
                     index={i}
+                    isFav={favoriteTopics.includes(t.id)}
+                    onToggleFav={toggleFavoriteTopic}
                   />
                 ))
               )}

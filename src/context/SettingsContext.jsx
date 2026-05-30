@@ -68,6 +68,22 @@ export function SettingsProvider({ children }) {
     )
   }
 
+  // favoriteTopics: array de ids de temas de Aprender guardados.
+  const [favoriteTopics, setFavoriteTopics] = useState(() => {
+    try {
+      const saved = localStorage.getItem('rezar-fav-topics')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  function toggleFavoriteTopic(id) {
+    setFavoriteTopics((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+    )
+  }
+
   useEffect(() => {
     localStorage.setItem('rezar-font-size', String(fontSize))
   }, [fontSize])
@@ -94,6 +110,10 @@ export function SettingsProvider({ children }) {
   }, [favoriteSurahs])
 
   useEffect(() => {
+    localStorage.setItem('rezar-fav-topics', JSON.stringify(favoriteTopics))
+  }, [favoriteTopics])
+
+  useEffect(() => {
     if (lastReadSurah != null) {
       localStorage.setItem('rezar-last-surah', String(lastReadSurah))
     }
@@ -116,6 +136,7 @@ export function SettingsProvider({ children }) {
       reciterId, setReciterId, reciter,
       favoriteSurahs, toggleFavorite,
       lastReadSurah, setLastReadSurah,
+      favoriteTopics, toggleFavoriteTopic,
     }}>
       {children}
     </SettingsContext.Provider>
