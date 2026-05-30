@@ -62,6 +62,11 @@ export function SettingsProvider({ children }) {
     return saved ? Number(saved) : null
   })
 
+  // notificationsEnabled: avisos a la hora de cada rezo.
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    return localStorage.getItem('rezar-notifications') === 'true'
+  })
+
   function toggleFavorite(num) {
     setFavoriteSurahs((prev) =>
       prev.includes(num) ? prev.filter((n) => n !== num) : [...prev, num]
@@ -114,6 +119,10 @@ export function SettingsProvider({ children }) {
   }, [favoriteTopics])
 
   useEffect(() => {
+    localStorage.setItem('rezar-notifications', String(notificationsEnabled))
+  }, [notificationsEnabled])
+
+  useEffect(() => {
     if (lastReadSurah != null) {
       localStorage.setItem('rezar-last-surah', String(lastReadSurah))
     }
@@ -137,6 +146,7 @@ export function SettingsProvider({ children }) {
       favoriteSurahs, toggleFavorite,
       lastReadSurah, setLastReadSurah,
       favoriteTopics, toggleFavoriteTopic,
+      notificationsEnabled, setNotificationsEnabled,
     }}>
       {children}
     </SettingsContext.Provider>

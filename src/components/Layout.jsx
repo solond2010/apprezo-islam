@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Moon, BookOpen, Lightbulb, SlidersHorizontal } from 'lucide-react'
 import { useSettings } from '../context/SettingsContext'
 import ElRezo from '../pages/ElRezo'
@@ -51,17 +51,17 @@ export default function Layout() {
       )}
 
       <main className="flex-1 overflow-y-auto px-4 pb-2 relative z-10 scrollbar-none">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-          >
-            <ActivePage />
-          </motion.div>
-        </AnimatePresence>
+        {/* Sin mode="wait" para evitar bloqueos: la página activa cambia al
+            instante y solo anima su entrada (las páginas con timers, como
+            Mihrab, no deben retener la transición con su animación de salida). */}
+        <motion.div
+          key={active}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+        >
+          <ActivePage />
+        </motion.div>
       </main>
 
       <nav

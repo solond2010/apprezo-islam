@@ -15,6 +15,7 @@ import { useSettings } from '../context/SettingsContext'
 import PrayerGuide from './PrayerGuide'
 import QiblaScreen from '../components/QiblaScreen'
 import Mas from './Mas'
+import { schedulePrayerNotifications, cancelPrayerNotifications } from '../utils/notifications'
 import logoMihrab from '/fotos/logo1.png'
 
 const FALLBACK_COORDS = { lat: 40.4168, lon: -3.7038 }
@@ -390,7 +391,7 @@ function VerseCard({ darkMode }) {
 }
 
 export default function ElRezo() {
-  const { userLocation, darkMode } = useSettings()
+  const { userLocation, darkMode, notificationsEnabled } = useSettings()
   const [timings, setTimings] = useState(null)
   const [locationName, setLocationName] = useState('Obteniendo ubicación...')
   const [loading, setLoading] = useState(true)
@@ -451,6 +452,16 @@ export default function ElRezo() {
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
   }, [timings])
+
+  // Programar / cancelar notificaciones de rezo
+  useEffect(() => {
+    if (notificationsEnabled && timings) {
+      schedulePrayerNotifications(timings)
+    } else {
+      cancelPrayerNotifications()
+    }
+    return () => cancelPrayerNotifications()
+  }, [notificationsEnabled, timings])
 
   if (currentScreen === 'qibla' && userCoords) {
     return (

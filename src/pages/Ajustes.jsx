@@ -1,9 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSettings } from '../context/SettingsContext'
-import { Text, Sun, Moon, Minus, Plus, Info, Heart, User, MapPin, ChevronRight, Mic, ChevronDown } from 'lucide-react'
+import { Text, Sun, Moon, Minus, Plus, Info, Heart, User, MapPin, ChevronRight, Mic, ChevronDown, Bell } from 'lucide-react'
 import { useState } from 'react'
 import LocationSelector from '../components/LocationSelector'
 import { RECITERS } from '../data/reciters'
+import { requestNotificationPermission, getPermission, sendTestNotification } from '../utils/notifications'
 
 function SettingRow({ icon: Icon, iconColor = 'text-amber-600', iconBg = 'bg-amber-50', label, children }) {
   return (
@@ -28,9 +29,31 @@ export default function Ajustes() {
     userGender, setUserGender,
     userLocation, setUserLocation,
     reciterId, setReciterId, reciter,
+    notificationsEnabled, setNotificationsEnabled,
   } = useSettings()
   const [locationModalOpen, setLocationModalOpen] = useState(false)
   const [reciterOpen, setReciterOpen] = useState(false)
+  const [notifMsg, setNotifMsg] = useState('')
+
+  async function handleToggleNotifications() {
+    if (notificationsEnabled) {
+      setNotificationsEnabled(false)
+      setNotifMsg('')
+      return
+    }
+    const perm = getPermission()
+    if (perm === 'unsupported') {
+      setNotifMsg('Tu navegador no soporta notificaciones.')
+      return
+    }
+    const result = perm === 'granted' ? 'granted' : await requestNotificationPermission()
+    if (result === 'granted') {
+      setNotificationsEnabled(true)
+      setNotifMsg('')
+    } else {
+      setNotifMsg('Permiso denegado. Actívalo en los ajustes de tu navegador.')
+    }
+  }
 
   return (
     <motion.div
@@ -61,6 +84,62 @@ export default function Ajustes() {
             <ChevronRight size={14} />
           </button>
         </SettingRow>
+
+        {/* ── Notificaciones de rezo ─────────────────────────────── */}
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/60 overflow-hidden">
+          <div className="px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center shrink-0">
+                <Bell size={18} className="text-emerald-600" strokeWidth={2.2} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-gray-800">Notificaciones de rezo</p>
+                <p className="text-[11px] text-gray-500">Aviso a la hora de cada oración</p>
+              </div>
+            </div>
+            <button
+              onClick={handleToggleNotifications}
+              className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${
+                notificationsEnabled ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gray-300'
+              }`}
+            >
+              <motion.div
+                animate={{ x: notificationsEnabled ? 22 : 2 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+              />
+            </button>
+          </div>
+
+          <AnimatePresence initial={false}>
+            {notificationsEnabled && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden border-t border-amber-100"
+              >
+                <div className="px-4 py-3 flex items-center justify-between gap-3">
+                  <p className="text-[11px] text-gray-500 leading-snug flex-1">
+                    En iPhone funcionan mejor con la app añadida a la pantalla de inicio.
+                  </p>
+                  <button
+                    onClick={() => sendTestNotification()}
+                    className="shrink-0 px-3 py-1.5 rounded-lg text-white text-xs font-bold shadow-sm active:scale-95"
+                    style={{ background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)' }}
+                  >
+                    Probar
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {notifMsg && (
+            <p className="px-4 pb-3 text-[11px] text-rose-500 font-medium">{notifMsg}</p>
+          )}
+        </div>
 
         {/* ── Recitador del Quran ────────────────────────────────── */}
         <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/60 overflow-hidden">
