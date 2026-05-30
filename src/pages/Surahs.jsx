@@ -1,127 +1,15 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronRight, ArrowLeft, Play, Pause,
-  SkipBack, SkipForward, BookOpen, X, ChevronUp,
+  SkipBack, SkipForward, BookOpen, X, ChevronUp, Search, Loader2,
 } from 'lucide-react'
 import { useSettings } from '../context/SettingsContext'
 import { buildAyahUrl } from '../data/reciters'
+import { SURAHS, fetchSurahVerses } from '../data/surahsList'
 
 // ── Velocidades disponibles ───────────────────────────────────────────────
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
-
-// ── Datos de surahs ───────────────────────────────────────────────────────
-const surahs = [
-  {
-    id: 1, surahNum: 1,
-    name: 'Al-Fatiha', nameAr: 'الفاتحة', meaning: 'La Apertura',
-    verses: [
-      { ayah: 1, arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', transliteracion: 'Bismil-lahi r-rahmani r-rahim', traduccion: 'En el nombre de Dios, el Clemente, el Misericordioso' },
-      { ayah: 2, arabic: 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ', transliteracion: 'Al-hamdu lil-lahi rabil-alamin', traduccion: 'Alabado sea Dios, Señor de todos los mundos' },
-      { ayah: 3, arabic: 'الرَّحْمَٰنِ الرَّحِيمِ', transliteracion: 'Ar-rahmani r-rahim', traduccion: 'El Clemente, el Misericordioso' },
-      { ayah: 4, arabic: 'مَالِكِ يَوْمِ الدِّينِ', transliteracion: 'Maliki yawmid-din', traduccion: 'Soberano del Día del Juicio' },
-      { ayah: 5, arabic: 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ', transliteracion: "Iyaka na'budu wa iyaka nasta'in", traduccion: 'Solo a Ti te adoramos y solo a Ti pedimos ayuda' },
-      { ayah: 6, arabic: 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ', transliteracion: 'Ihdinas-siratal mustaqim', traduccion: 'Guíanos por el camino recto' },
-      { ayah: 7, arabic: "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ", transliteracion: "Siratal ladina an'amta 'alayhim, gayril magdubi 'alayhim, walad-dalin", traduccion: 'El camino de quienes has bendecido, no el de los que cayeron en ira, ni el de los extraviados' },
-    ],
-  },
-  {
-    id: 2, surahNum: 112,
-    name: 'Al-Ikhlas', nameAr: 'الإخلاص', meaning: 'La Sinceridad',
-    verses: [
-      { ayah: 1, arabic: 'قُلْ هُوَ اللَّهُ أَحَدٌ', transliteracion: 'Qul huwal-lahu ahad', traduccion: 'Di: Él es Dios, Uno' },
-      { ayah: 2, arabic: 'اللَّهُ الصَّمَدُ', transliteracion: 'Al-lahus-samad', traduccion: 'Dios, el Absoluto' },
-      { ayah: 3, arabic: 'لَمْ يَلِدْ وَلَمْ يُولَدْ', transliteracion: 'Lam yalid wa lam yulad', traduccion: 'No ha engendrado ni ha sido engendrado' },
-      { ayah: 4, arabic: 'وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ', transliteracion: 'Wa lam yakun lahu kufuwan ahad', traduccion: 'Y no hay nadie comparable a Él' },
-    ],
-  },
-  {
-    id: 3, surahNum: 113,
-    name: 'Al-Falaq', nameAr: 'الفلق', meaning: 'El Amanecer',
-    verses: [
-      { ayah: 1, arabic: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ', transliteracion: "Qul a'udhu bi rabbi l-falaq", traduccion: 'Di: Me refugio en el Señor del amanecer' },
-      { ayah: 2, arabic: 'مِن شَرِّ مَا خَلَقَ', transliteracion: 'Min sharri ma khalaq', traduccion: 'Del mal de todo lo que Él ha creado' },
-      { ayah: 3, arabic: 'وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ', transliteracion: 'Wa min sharri ghasiqin idha waqab', traduccion: 'Y del mal de la oscuridad cuando se extiende' },
-      { ayah: 4, arabic: 'وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ', transliteracion: "Wa min sharrin-naffathati fil-'uqad", traduccion: 'Y del mal de las que soplan sobre los nudos' },
-      { ayah: 5, arabic: 'وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ', transliteracion: 'Wa min sharri hasidin idha hasad', traduccion: 'Y del mal del envidioso cuando envidia' },
-    ],
-  },
-  {
-    id: 4, surahNum: 114,
-    name: 'An-Nas', nameAr: 'الناس', meaning: 'La Humanidad',
-    verses: [
-      { ayah: 1, arabic: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ', transliteracion: "Qul a'udhu bi rabbi n-nas", traduccion: 'Di: Me refugio en el Señor de la humanidad' },
-      { ayah: 2, arabic: 'مَلِكِ النَّاسِ', transliteracion: 'Maliki n-nas', traduccion: 'Rey de la humanidad' },
-      { ayah: 3, arabic: 'إِلَٰهِ النَّاسِ', transliteracion: 'Ilahi n-nas', traduccion: 'Dios de la humanidad' },
-      { ayah: 4, arabic: 'مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ', transliteracion: 'Min sharril-waswasil-khannasi', traduccion: 'Del mal del susurrador que se esconde' },
-      { ayah: 5, arabic: 'الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ', transliteracion: 'Alladhi yuwaswisu fi suduri n-nas', traduccion: 'Que susurra en los pechos de la humanidad' },
-      { ayah: 6, arabic: 'مِنَ الْجِنَّةِ وَالنَّاسِ', transliteracion: 'Minal-jinnati wan-nas', traduccion: 'Sea de los genios o de los hombres' },
-    ],
-  },
-  {
-    id: 5, surahNum: 109,
-    name: 'Al-Kafiroun', nameAr: 'الكافرون', meaning: 'Los Incrédulos',
-    verses: [
-      { ayah: 1, arabic: 'قُلْ يَا أَيُّهَا الْكَافِرُونَ', transliteracion: 'Qul ya ayyuhal-kafirun', traduccion: 'Di: ¡Oh, incrédulos!' },
-      { ayah: 2, arabic: 'لَا أَعْبُدُ مَا تَعْبُدُونَ', transliteracion: "La a'budu ma ta'budun", traduccion: 'No adoro lo que vosotros adoráis' },
-      { ayah: 3, arabic: 'وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ', transliteracion: "Wa la antum 'abiduna ma a'bud", traduccion: 'Ni vosotros adoráis lo que yo adoro' },
-      { ayah: 4, arabic: 'وَلَا أَنَا عَابِدٌ مَّا عَبَدتُّمْ', transliteracion: "Wa la ana 'abidun ma 'abadtum", traduccion: 'Ni yo seré adorador de lo que vosotros adoráis' },
-      { ayah: 5, arabic: 'وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ', transliteracion: "Wa la antum 'abiduna ma a'bud", traduccion: 'Ni vosotros adoráis lo que yo adoro' },
-      { ayah: 6, arabic: 'لَكُمْ دِينُكُمْ وَلِيَ دِينِ', transliteracion: 'Lakum dinukum wa liya din', traduccion: 'Para vosotros vuestra religión, y para mí la mía' },
-    ],
-  },
-  {
-    id: 6, surahNum: 108,
-    name: 'Al-Kawthar', nameAr: 'الكوثر', meaning: 'La Abundancia',
-    verses: [
-      { ayah: 1, arabic: 'إِنَّا أَعْطَيْنَاكَ الْكَوْثَرَ', transliteracion: "Inna a'tayna kal-kawthar", traduccion: 'En verdad te hemos dado la abundancia' },
-      { ayah: 2, arabic: 'فَصَلِّ لِرَبِّكَ وَانْحَرْ', transliteracion: 'Fasalli li rabbika wan-har', traduccion: 'Así que ora a tu Señor y ofrece el sacrificio' },
-      { ayah: 3, arabic: 'إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ', transliteracion: "Inna shani'aka huwal-abtar", traduccion: 'Quien te odia es el que está verdaderamente cortado' },
-    ],
-  },
-  {
-    id: 7, surahNum: 103,
-    name: 'Al-Asr', nameAr: 'العصر', meaning: 'El Tiempo',
-    verses: [
-      { ayah: 1, arabic: 'وَالْعَصْرِ', transliteracion: "Wal-'asr", traduccion: '¡Por el tiempo!' },
-      { ayah: 2, arabic: 'إِنَّ الْإِنسَانَ لَفِي خُسْرٍ', transliteracion: 'Innal-insana lafi khusr', traduccion: 'El ser humano está ciertamente en pérdida' },
-      { ayah: 3, arabic: 'إِلَّا الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَتَوَاصَوْا بِالْحَقِّ وَتَوَاصَوْا بِالصَّبْرِ', transliteracion: "Illal-ladhina amanu wa 'amilus-salihati wa tawassaw bil-haqqi wa tawassaw bis-sabr", traduccion: 'Excepto los que creen, hacen buenas obras, se exhortan a la verdad y se exhortan a la paciencia' },
-    ],
-  },
-  {
-    id: 8, surahNum: 110,
-    name: 'An-Nasr', nameAr: 'النصر', meaning: 'La Victoria',
-    verses: [
-      { ayah: 1, arabic: 'إِذَا جَاءَ نَصْرُ اللَّهِ وَالْفَتْحُ', transliteracion: "Idha ja'a nasrullahi wal-fath", traduccion: 'Cuando llegue la ayuda de Dios y la victoria' },
-      { ayah: 2, arabic: 'وَرَأَيْتَ النَّاسَ يَدْخُلُونَ فِي دِينِ اللَّهِ أَفْوَاجًا', transliteracion: "Wa ra'aytan-nasa yadkhuluna fi dinil-lahi afwaja", traduccion: 'Y veas a la gente entrar en la religión de Dios en multitudes' },
-      { ayah: 3, arabic: 'فَسَبِّحْ بِحَمْدِ رَبِّكَ وَاسْتَغْفِرْهُ إِنَّهُ كَانَ تَوَّابًا', transliteracion: 'Fasabbih bihamdi rabbika wastaghfirhu innahu kana tawwaba', traduccion: 'Entonces glorifica a tu Señor con Su alabanza y pídele perdón; Él es siempre indulgente' },
-    ],
-  },
-  {
-    id: 9, surahNum: 105,
-    name: 'Al-Fil', nameAr: 'الفيل', meaning: 'El Elefante',
-    verses: [
-      { ayah: 1, arabic: 'أَلَمْ تَرَ كَيْفَ فَعَلَ رَبُّكَ بِأَصْحَابِ الْفِيلِ', transliteracion: "Alam tara kayfa fa'ala rabbuka bi-as-habil-fil", traduccion: '¿No has visto cómo actuó tu Señor con los del elefante?' },
-      { ayah: 2, arabic: 'أَلَمْ يَجْعَلْ كَيْدَهُمْ فِي تَضْلِيلٍ', transliteracion: "Alam yaj'al kaydahum fi tadlil", traduccion: '¿Acaso no frustró su plan?' },
-      { ayah: 3, arabic: 'وَأَرْسَلَ عَلَيْهِمْ طَيْرًا أَبَابِيلَ', transliteracion: "Wa arsala 'alayhim tayran ababila", traduccion: 'Y envió contra ellos bandadas de pájaros' },
-      { ayah: 4, arabic: 'تَرْمِيهِم بِحِجَارَةٍ مِّن سِجِّيلٍ', transliteracion: 'Tarmihim bihijaratin min sijjil', traduccion: 'Que les arrojaron piedras de arcilla endurecida' },
-      { ayah: 5, arabic: 'فَجَعَلَهُمْ كَعَصْفٍ مَّأْكُولٍ', transliteracion: "Faja'alahum ka'asfin ma'kul", traduccion: 'Y los dejó como paja devorada' },
-    ],
-  },
-  {
-    id: 10, surahNum: 107,
-    name: 'Al-Maun', nameAr: 'الماعون', meaning: 'La Ayuda Mutua',
-    verses: [
-      { ayah: 1, arabic: 'أَرَأَيْتَ الَّذِي يُكَذِّبُ بِالدِّينِ', transliteracion: "Ara'aytal-ladhi yukadhibu bid-din", traduccion: '¿Has visto a quien desmiente el Juicio?' },
-      { ayah: 2, arabic: 'فَذَٰلِكَ الَّذِي يَدُعُّ الْيَتِيمَ', transliteracion: "Fadhalika l-ladhi yadu'ul-yatim", traduccion: 'Ese es quien rechaza brutalmente al huérfano' },
-      { ayah: 3, arabic: 'وَلَا يَحُضُّ عَلَىٰ طَعَامِ الْمِسْكِينِ', transliteracion: "Wa la yahuddu 'ala ta'amil-miskin", traduccion: 'Y no incita a alimentar al pobre' },
-      { ayah: 4, arabic: 'فَوَيْلٌ لِّلْمُصَلِّينَ', transliteracion: 'Fawaylun lil-musallin', traduccion: '¡Ay de los que oran' },
-      { ayah: 5, arabic: 'الَّذِينَ هُمْ عَن صَلَاتِهِمْ سَاهُونَ', transliteracion: 'Alladhina hum an salatihim sahun', traduccion: 'Pero son negligentes en su oración!' },
-      { ayah: 6, arabic: 'الَّذِينَ هُمْ يُرَاءُونَ', transliteracion: "Alladhina hum yura'un", traduccion: 'Los que actúan por ostentación' },
-      { ayah: 7, arabic: 'وَيَمْنَعُونَ الْمَاعُونَ', transliteracion: "Wa yamna'unal-ma'un", traduccion: 'Y niegan la ayuda más pequeña' },
-    ],
-  },
-]
 
 // ── Mini reproductor global (fijo encima del nav) ─────────────────────────
 
@@ -265,9 +153,24 @@ function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
   const [currentAyah, setCurrentAyah] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
+  const [verses, setVerses] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const audioRef = useRef(null)
   const ayahRefs = useRef([])
   const sequenceRef = useRef(null)
+
+  // Cargar los versículos de la surah (desde caché o API)
+  useEffect(() => {
+    let alive = true
+    setLoading(true)
+    setError(false)
+    setVerses([])
+    fetchSurahVerses(surah.num)
+      .then((v) => { if (alive) { setVerses(v); setLoading(false) } })
+      .catch(() => { if (alive) { setError(true); setLoading(false) } })
+    return () => { alive = false }
+  }, [surah.num])
 
   // Limpiar audio al desmontar
   useEffect(() => {
@@ -306,19 +209,19 @@ function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
 
       if (sequenceRef.current !== token) return
 
-      if (idx >= surah.verses.length) {
+      if (idx >= verses.length) {
         setIsPlaying(false)
         setCurrentAyah(null)
         sequenceRef.current = null
         return
       }
 
-      const verse = surah.verses[idx]
+      const verse = verses[idx]
       setCurrentAyah(idx)
       setIsPlaying(true)
 
       // Cambiar src y cargar explícitamente
-      audio.src = buildAyahUrl(reciter.path, surah.surahNum, verse.ayah)
+      audio.src = buildAyahUrl(reciter.path, surah.num, verse.ayah)
       audio.load()
 
       // Aplicar velocidad después del load (algunos browsers la resetean)
@@ -339,7 +242,7 @@ function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
     }
 
     advance(startIdx)
-  }, [surah, reciter])
+  }, [surah, reciter, verses])
 
   function stopAudio() {
     sequenceRef.current = null // invalida el token activo
@@ -373,7 +276,7 @@ function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
   }
 
   function handleNext() {
-    if (currentAyah === null || currentAyah >= surah.verses.length - 1) return
+    if (currentAyah === null || currentAyah >= verses.length - 1) return
     stopAudio()
     setTimeout(() => playFrom(currentAyah + 1), 40)
   }
@@ -414,13 +317,14 @@ function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
               {surah.name}
             </h2>
             <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              {surah.nameAr} · {surah.meaning} · {surah.verses.length} ayahs
+              {surah.nameAr} · {surah.meaning} · {surah.ayahs} ayahs
             </p>
           </div>
           {/* Reproducir todo */}
           <button
             onClick={() => { stopAudio(); setTimeout(() => playFrom(0), 40) }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-white text-xs font-bold active:scale-95 transition-transform shadow-md"
+            disabled={loading || error || verses.length === 0}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-white text-xs font-bold active:scale-95 transition-transform shadow-md disabled:opacity-40"
             style={{ background: 'linear-gradient(135deg, #C2410C, #EA580C)' }}
           >
             <Play size={13} className="fill-white" />
@@ -442,16 +346,51 @@ function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
                 <span className="text-[10px] font-bold text-amber-200 uppercase tracking-widest">Sagrado Corán</span>
               </div>
               <h3 className="text-2xl font-black text-white">{surah.name}</h3>
-              <p className="text-sm text-white/70 mt-1">{surah.meaning} · {surah.verses.length} ayahs</p>
+              <p className="text-sm text-white/70 mt-1">{surah.meaning} · {surah.ayahs} ayahs</p>
               <p className="text-xs text-white/50 mt-1">Recitador: {reciter?.name || 'Al-Sudais'}</p>
             </div>
             <p className="text-4xl text-amber-200/80 font-light" dir="rtl">{surah.nameAr}</p>
           </div>
         </div>
 
+        {/* Estado de carga */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <Loader2 size={32} className="text-amber-500 animate-spin" />
+            <p className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              Cargando versículos…
+            </p>
+          </div>
+        )}
+
+        {/* Estado de error */}
+        {error && (
+          <div className="flex flex-col items-center justify-center py-20 gap-3 px-6 text-center">
+            <p className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              No se pudieron cargar los versículos
+            </p>
+            <p className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+              Revisa tu conexión a internet e inténtalo de nuevo.
+            </p>
+            <button
+              onClick={() => {
+                setLoading(true); setError(false)
+                fetchSurahVerses(surah.num)
+                  .then((v) => { setVerses(v); setLoading(false) })
+                  .catch(() => { setError(true); setLoading(false) })
+              }}
+              className="mt-1 px-4 py-2 rounded-xl text-white text-xs font-bold shadow-md active:scale-95"
+              style={{ background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)' }}
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
+
         {/* Lista de ayahs */}
+        {!loading && !error && (
         <div className="flex flex-col gap-3">
-          {surah.verses.map((verse, idx) => {
+          {verses.map((verse, idx) => {
             const isActive = currentAyah === idx
             return (
               <motion.div
@@ -558,13 +497,14 @@ function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
             )
           })}
         </div>
+        )}
       </motion.div>
 
       {/* Mini reproductor persistente */}
       <AnimatePresence>
         {showPlayer && (
           <MiniPlayer
-            surah={surah}
+            surah={{ ...surah, verses }}
             currentAyah={currentAyah}
             isPlaying={isPlaying}
             speed={speed}
@@ -584,6 +524,19 @@ function SurahDetail({ surah, onBack, fontSize, darkMode, reciter }) {
 // ── Lista de surahs ───────────────────────────────────────────────────────
 
 function SurahList({ onSelect, darkMode, reciter }) {
+  const [query, setQuery] = useState('')
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return SURAHS
+    return SURAHS.filter((s) =>
+      s.name.toLowerCase().includes(q) ||
+      s.meaning.toLowerCase().includes(q) ||
+      s.nameAr.includes(q) ||
+      String(s.num) === q
+    )
+  }, [query])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -601,13 +554,13 @@ function SurahList({ onSelect, darkMode, reciter }) {
           Surahs
         </h1>
         <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-          Recitador: {reciter?.name || 'Al-Sudais'} · {surahs.length} surahs disponibles
+          Recitador: {reciter?.name || 'Al-Sudais'} · {SURAHS.length} surahs completas
         </p>
       </div>
 
       {/* Banner recitador */}
       <div
-        className="relative rounded-3xl px-5 py-5 mb-5 overflow-hidden shadow-lg"
+        className="relative rounded-3xl px-5 py-5 mb-4 overflow-hidden shadow-lg"
         style={{ background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)' }}
       >
         <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-white/20 pointer-events-none" />
@@ -617,14 +570,41 @@ function SurahList({ onSelect, darkMode, reciter }) {
         <p className="text-[10px] text-white/60 mt-2 italic">Puedes cambiarlo en Ajustes</p>
       </div>
 
+      {/* Buscador */}
+      <div className="mb-4 relative">
+        <Search
+          size={17}
+          className={`absolute left-4 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}
+        />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar surah por nombre o número…"
+          className={`w-full pl-11 pr-10 py-3 rounded-2xl text-sm font-medium shadow-sm border outline-none focus:ring-2 focus:ring-amber-400/50 transition-shadow ${
+            darkMode
+              ? 'bg-[#1e1e1e]/70 backdrop-blur-md border-[#2a2a2a] text-white placeholder:text-gray-500'
+              : 'bg-white/70 backdrop-blur-md border-white/60 text-gray-800 placeholder:text-gray-400'
+          }`}
+        />
+        {query && (
+          <button
+            onClick={() => setQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-200/80 flex items-center justify-center active:scale-90"
+          >
+            <X size={12} className="text-gray-600" />
+          </button>
+        )}
+      </div>
+
       {/* Lista */}
       <div className="flex flex-col gap-2.5">
-        {surahs.map((s, i) => (
+        {filtered.map((s, i) => (
           <motion.button
-            key={s.id}
+            key={s.num}
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.04 }}
+            transition={{ delay: Math.min(i, 12) * 0.03 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onSelect(s)}
             className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl shadow-sm border text-left transition-colors ${
@@ -635,22 +615,22 @@ function SurahList({ onSelect, darkMode, reciter }) {
           >
             {/* Número */}
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
-              <span className="text-sm font-black text-white tabular-nums">{s.id}</span>
+              <span className="text-sm font-black text-white tabular-nums">{s.num}</span>
             </div>
 
             {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-2">
                 <p className={`text-base font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{s.name}</p>
-                <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{s.meaning}</span>
+                <span className={`text-xs truncate ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{s.meaning}</span>
               </div>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                  {s.verses.length} ayahs
+                  {s.ayahs} ayahs
                 </span>
                 <span className={`text-[10px] ${darkMode ? 'text-gray-600' : 'text-gray-300'}`}>·</span>
                 <div className="flex items-center gap-1">
-                  <Play size={9} className={darkMode ? 'text-amber-500' : 'text-amber-500'} />
+                  <Play size={9} className="text-amber-500" />
                   <span className={`text-[10px] font-semibold ${darkMode ? 'text-amber-500' : 'text-amber-600'}`}>
                     {reciter?.name || 'Al-Sudais'}
                   </span>
@@ -667,6 +647,14 @@ function SurahList({ onSelect, darkMode, reciter }) {
             </div>
           </motion.button>
         ))}
+
+        {filtered.length === 0 && (
+          <div className="py-16 text-center">
+            <p className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              No se encontró ninguna surah para «{query}»
+            </p>
+          </div>
+        )}
       </div>
     </motion.div>
   )
@@ -685,7 +673,7 @@ export default function Surahs() {
           <SurahList key="list" onSelect={setSelected} darkMode={darkMode} reciter={reciter} />
         ) : (
           <SurahDetail
-            key={`surah-${selected.id}`}
+            key={`surah-${selected.num}`}
             surah={selected}
             onBack={() => setSelected(null)}
             fontSize={fontSize}
