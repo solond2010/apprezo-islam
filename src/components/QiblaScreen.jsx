@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
 import { useSettings } from '../context/SettingsContext'
 
 const MECCA = { lat: 21.4225, lng: 39.8262 }
@@ -16,16 +17,43 @@ function calculateQiblaAngle(userLat, userLng) {
   return (angle + 360) % 360
 }
 
-function QiblaCompass({ latitude, longitude }) {
+// Distancia en km hasta La Meca (fórmula del haversine)
+function distanceToMecca(userLat, userLng) {
+  const R = 6371
+  const dLat = toRad(MECCA.lat - userLat)
+  const dLng = toRad(MECCA.lng - userLng)
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(userLat)) * Math.cos(toRad(MECCA.lat)) * Math.sin(dLng / 2) ** 2
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)))
+}
+
+function QiblaCompass({ latitude, longitude, darkMode }) {
   const [permissionState, setPermissionState] = useState('idle')
   const [deviceHeading, setDeviceHeading] = useState(null)
   const listenerRef = useRef(null)
   const smoothedHeading = useRef(0)
   const lastUpdate = useRef(0)
+  const wasAligned = useRef(false)
   const SMOOTHING = 0.15
 
   const qiblaAngle = calculateQiblaAngle(latitude, longitude)
+  const distanceKm = distanceToMecca(latitude, longitude)
   const needleRotation = deviceHeading !== null ? qiblaAngle - deviceHeading : qiblaAngle
+
+  // ¿Está el móvil apuntando a la Qibla? (diferencia normalizada ≤ 7°)
+  let diff = ((needleRotation % 360) + 360) % 360
+  if (diff > 180) diff = 360 - diff
+  const aligned = deviceHeading !== null && diff <= 7
+
+  // Vibrar una vez al alinear
+  useEffect(() => {
+    if (aligned && !wasAligned.current) {
+      if (navigator.vibrate) navigator.vibrate(60)
+      wasAligned.current = true
+    } else if (!aligned) {
+      wasAligned.current = false
+    }
+  }, [aligned])
 
   const isIOS =
     typeof DeviceOrientationEvent !== 'undefined' &&
@@ -90,7 +118,9 @@ function QiblaCompass({ latitude, longitude }) {
 
   if (permissionState === 'idle' || permissionState === 'requesting') {
     return (
-      <div className="bg-white/70 backdrop-blur-md rounded-3xl border border-white/60 shadow-lg p-6 flex flex-col items-center">
+      <div className={`rounded-3xl border shadow-lg p-6 flex flex-col items-center ${
+        darkMode ? 'bg-[#1e1e1e]/70 backdrop-blur-md border-[#2a2a2a]' : 'bg-white/70 backdrop-blur-md border-white/60'
+      }`}>
         <div className="relative w-56 h-56">
           <svg viewBox="0 0 200 200" className="w-full h-full">
             <defs>
@@ -108,10 +138,19 @@ function QiblaCompass({ latitude, longitude }) {
             <circle cx="100" cy="100" r="6" fill="#F59E0B" />
           </svg>
         </div>
+        {/* Info de distancia y ángulo */}
+        <div className="mt-4 flex items-center gap-2">
+          <div className={`px-3 py-1.5 rounded-full text-xs font-bold ${darkMode ? 'bg-white/10 text-amber-300' : 'bg-amber-50 text-amber-700'}`}>
+            🕋 {distanceKm.toLocaleString('es')} km a La Meca
+          </div>
+          <div className={`px-3 py-1.5 rounded-full text-xs font-bold ${darkMode ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+            {Math.round(qiblaAngle)}°
+          </div>
+        </div>
         <button
           onClick={requestSensor}
           disabled={permissionState === 'requesting'}
-          className="mt-6 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-95 disabled:opacity-60 text-white rounded-2xl py-4 font-bold text-sm transition-all shadow-lg shadow-amber-500/30"
+          className="mt-5 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-95 disabled:opacity-60 text-white rounded-2xl py-4 font-bold text-sm transition-all shadow-lg shadow-amber-500/30"
         >
           {permissionState === 'requesting' ? 'Activando...' : 'Activar brújula'}
         </button>
@@ -121,7 +160,9 @@ function QiblaCompass({ latitude, longitude }) {
 
   if (permissionState === 'denied') {
     return (
-      <div className="bg-[#FFFBF2] rounded-2xl border border-[#EDE3D3] shadow-sm p-5 flex flex-col items-center">
+      <div className={`rounded-2xl border shadow-sm p-5 flex flex-col items-center ${
+        darkMode ? 'bg-[#1e1e1e]/70 border-[#2a2a2a]' : 'bg-[#FFFBF2] border-[#EDE3D3]'
+      }`}>
         <div className="relative w-52 h-52">
           <svg viewBox="0 0 200 200" className="w-full h-full">
             <circle cx="100" cy="100" r="92" fill="none" stroke="#e5e7eb" strokeWidth="1.5" />
@@ -132,11 +173,14 @@ function QiblaCompass({ latitude, longitude }) {
             <text x="22" y="102" textAnchor="middle" fill="#9ca3af" fontSize="11" fontWeight="600" fontFamily="system-ui">O</text>
           </svg>
         </div>
-        <p className="mt-5 text-sm text-gray-500 text-center leading-relaxed">
+        <p className={`mt-5 text-sm text-center leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           Permiso denegado. Ve a{' '}
-          <strong className="text-gray-700">Ajustes → Safari → Sensor de movimiento y rotación</strong>
+          <strong className={darkMode ? 'text-gray-200' : 'text-gray-700'}>Ajustes → Safari → Sensor de movimiento y rotación</strong>
           {' '}y actívalo.
         </p>
+        <div className={`mt-4 px-3 py-1.5 rounded-full text-xs font-bold ${darkMode ? 'bg-white/10 text-amber-300' : 'bg-amber-50 text-amber-700'}`}>
+          🕋 {distanceKm.toLocaleString('es')} km · Qibla {Math.round(qiblaAngle)}°
+        </div>
       </div>
     )
   }
@@ -144,7 +188,16 @@ function QiblaCompass({ latitude, longitude }) {
   const showStatic = permissionState === 'unavailable' || deviceHeading === null
 
   return (
-    <div className="bg-white/70 backdrop-blur-md rounded-3xl border border-white/60 shadow-lg p-6 flex flex-col items-center">
+    <div
+      className="rounded-3xl border shadow-lg p-6 flex flex-col items-center transition-colors duration-300"
+      style={{
+        background: aligned
+          ? (darkMode ? 'rgba(6,78,59,0.4)' : 'rgba(209,250,229,0.85)')
+          : (darkMode ? 'rgba(30,30,30,0.7)' : 'rgba(255,255,255,0.7)'),
+        borderColor: aligned ? 'rgba(16,185,129,0.5)' : (darkMode ? '#2a2a2a' : 'rgba(255,255,255,0.6)'),
+        backdropFilter: 'blur(12px)',
+      }}
+    >
       <div className="relative w-56 h-56 flex items-center justify-center">
         <svg viewBox="0 0 200 200" width="100%" style={{ maxWidth: '240px' }}>
           <defs>
@@ -189,30 +242,51 @@ function QiblaCompass({ latitude, longitude }) {
       </div>
 
       {!showStatic && (
-        <div className="mt-5 flex items-center gap-2 bg-gradient-to-r from-amber-100 to-orange-100 rounded-full px-4 py-2.5 border border-amber-200">
-          <span className="text-base">🕋</span>
-          <span className="text-xs font-bold text-amber-700">
-            Apunta tu móvil hacia la flecha
-          </span>
-        </div>
+        aligned ? (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="mt-5 flex items-center gap-2 rounded-full px-5 py-2.5 shadow-md"
+            style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}
+          >
+            <span className="text-base">✓</span>
+            <span className="text-xs font-black text-white uppercase tracking-wide">
+              ¡Alineado con la Qibla!
+            </span>
+          </motion.div>
+        ) : (
+          <div className={`mt-5 flex items-center gap-2 rounded-full px-4 py-2.5 border ${
+            darkMode ? 'bg-white/10 border-white/10' : 'bg-gradient-to-r from-amber-100 to-orange-100 border-amber-200'
+          }`}>
+            <span className="text-base">🕋</span>
+            <span className={`text-xs font-bold ${darkMode ? 'text-amber-300' : 'text-amber-700'}`}>
+              Gira tu móvil hacia la flecha
+            </span>
+          </div>
+        )
       )}
 
+      {/* Distancia siempre visible */}
+      <div className={`mt-3 px-3 py-1.5 rounded-full text-[11px] font-bold ${darkMode ? 'bg-white/5 text-gray-400' : 'bg-gray-50 text-gray-500'}`}>
+        {distanceKm.toLocaleString('es')} km hasta La Meca · Qibla {Math.round(qiblaAngle)}°
+      </div>
+
       {showStatic && (
-        <p className="mt-5 text-xs text-gray-500 text-center">
-          Sensor de orientación no disponible.
-          <br />
-          Ángulo Qibla: <strong className="text-amber-600">{Math.round(qiblaAngle)}°</strong>
+        <p className={`mt-3 text-xs text-center ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+          Sensor de orientación no disponible. Usa el ángulo de arriba.
         </p>
       )}
     </div>
   )
 }
 
-function QiblaVerse() {
+function QiblaVerse({ darkMode }) {
   return (
-    <div className="bg-white/70 backdrop-blur-md rounded-3xl border border-white/60 shadow-sm p-5">
+    <div className={`rounded-3xl border shadow-sm p-5 ${
+      darkMode ? 'bg-[#1e1e1e]/70 backdrop-blur-md border-[#2a2a2a]' : 'bg-white/70 backdrop-blur-md border-white/60'
+    }`}>
       <p
-        className="text-right text-amber-700 text-xl leading-loose mb-3 pb-3 border-b border-amber-100"
+        className={`text-right text-xl leading-loose mb-3 pb-3 border-b ${darkMode ? 'text-amber-300 border-[#2a2a2a]' : 'text-amber-700 border-amber-100'}`}
         dir="rtl"
       >
         وَجِّهْ وَجْهَكَ شَطْرَ الْمَسْجِدِ الْحَرَامِ
@@ -221,16 +295,16 @@ function QiblaVerse() {
       <div className="flex items-center gap-2 mb-3">
         <div className="w-1 h-8 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full" />
         <div>
-          <p className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest">
+          <p className={`text-[10px] font-extrabold uppercase tracking-widest ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>
             Corán · Al-Baqarah
           </p>
-          <p className="text-[9px] text-gray-400 mt-0.5">
+          <p className={`text-[9px] mt-0.5 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
             2:144 — Revelación auténtica
           </p>
         </div>
       </div>
 
-      <p className="text-xs text-gray-600 leading-relaxed italic">
+      <p className={`text-xs leading-relaxed italic ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
         &ldquo;Vuelve tu rostro en dirección de la Mezquita Sagrada. Y donde quiera que estéis,
         volveos hacia ella.&rdquo;
       </p>
@@ -260,8 +334,8 @@ export default function QiblaScreen({ latitude, longitude, onBack }) {
       </div>
 
       <div className="flex flex-col gap-4">
-        <QiblaCompass latitude={latitude} longitude={longitude} />
-        <QiblaVerse />
+        <QiblaCompass latitude={latitude} longitude={longitude} darkMode={darkMode} />
+        <QiblaVerse darkMode={darkMode} />
       </div>
     </div>
   )
