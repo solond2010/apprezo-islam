@@ -409,7 +409,7 @@ const StepCard = ({
   localItemIdx, recitItemIdx,
   currentItemIdx, isPlaying,
   onPlayItem, onOpenLightbox,
-  cardRef,
+  cardRef, darkMode,
 }) => {
   const isLocalActive = localItemIdx !== null && currentItemIdx === localItemIdx
   const isRecitActive = recitItemIdx !== null && currentItemIdx === recitItemIdx
@@ -447,11 +447,17 @@ const StepCard = ({
       <div
         className="relative rounded-3xl overflow-hidden"
         style={{
-          background: isAnyActive
-            ? 'linear-gradient(180deg, rgba(254,243,199,0.95) 0%, rgba(255,255,255,0.95) 100%)'
-            : 'rgba(255,255,255,0.85)',
+          background: darkMode
+            ? (isAnyActive
+                ? 'linear-gradient(180deg, rgba(60,40,15,0.95) 0%, rgba(30,30,30,0.95) 100%)'
+                : 'rgba(30,30,30,0.85)')
+            : (isAnyActive
+                ? 'linear-gradient(180deg, rgba(254,243,199,0.95) 0%, rgba(255,255,255,0.95) 100%)'
+                : 'rgba(255,255,255,0.85)'),
           backdropFilter: 'blur(14px)',
-          border: isAnyActive ? '1.5px solid rgba(245,158,11,0.4)' : '1px solid rgba(255,255,255,0.7)',
+          border: isAnyActive
+            ? '1.5px solid rgba(245,158,11,0.4)'
+            : darkMode ? '1px solid #2a2a2a' : '1px solid rgba(255,255,255,0.7)',
         }}
       >
         {/* ─── Header con número grande a la izquierda ─── */}
@@ -474,8 +480,8 @@ const StepCard = ({
           </div>
 
           <div className="flex-1 min-w-0 pt-0.5">
-            <h3 className="text-base font-black text-gray-800 leading-tight">{step.name}</h3>
-            <p className="text-sm text-amber-700 font-bold mt-0.5" dir="rtl">
+            <h3 className={`text-base font-black leading-tight ${darkMode ? 'text-white' : 'text-gray-800'}`}>{step.name}</h3>
+            <p className={`text-sm font-bold mt-0.5 ${darkMode ? 'text-amber-400' : 'text-amber-700'}`} dir="rtl">
               {step.nameAr}
             </p>
           </div>
@@ -546,9 +552,9 @@ const StepCard = ({
 
         {/* ─── Descripción ─── */}
         <div className="px-5 pt-3 pb-1">
-          <p className="text-sm text-gray-700 leading-relaxed text-center">{step.description}</p>
+          <p className={`text-sm leading-relaxed text-center ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{step.description}</p>
           {step.instruction && (
-            <p className="text-xs text-gray-500 leading-relaxed mt-1.5 italic text-center">
+            <p className={`text-xs leading-relaxed mt-1.5 italic text-center ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
               {step.instruction}
             </p>
           )}
@@ -568,8 +574,10 @@ const StepCard = ({
         {step.arabic && (
           <div className="mx-5 mt-4 rounded-2xl px-4 py-4 relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(254,243,199,0.5), rgba(254,215,170,0.4))',
-              border: '1px solid rgba(245,158,11,0.2)',
+              background: darkMode
+                ? 'linear-gradient(135deg, rgba(60,40,15,0.6), rgba(40,30,15,0.5))'
+                : 'linear-gradient(135deg, rgba(254,243,199,0.5), rgba(254,215,170,0.4))',
+              border: darkMode ? '1px solid rgba(245,158,11,0.25)' : '1px solid rgba(245,158,11,0.2)',
             }}
           >
             {/* Decoración esquinas */}
@@ -577,7 +585,7 @@ const StepCard = ({
               style={{ background: 'radial-gradient(circle, #FBBF24 0%, transparent 70%)' }} />
 
             <p
-              className="text-2xl leading-loose text-amber-900 text-right font-medium relative z-10"
+              className={`text-2xl leading-loose text-right font-medium relative z-10 ${darkMode ? 'text-amber-200' : 'text-amber-900'}`}
               dir="rtl"
               lang="ar"
             >
@@ -586,8 +594,8 @@ const StepCard = ({
 
             {step.transliteration && (
               <>
-                <div className="h-px bg-amber-200/60 my-2.5" />
-                <p className="text-xs text-amber-800 italic font-semibold leading-relaxed">
+                <div className={`h-px my-2.5 ${darkMode ? 'bg-amber-700/40' : 'bg-amber-200/60'}`} />
+                <p className={`text-xs italic font-semibold leading-relaxed ${darkMode ? 'text-amber-300' : 'text-amber-800'}`}>
                   {step.transliteration}
                 </p>
               </>
@@ -595,8 +603,8 @@ const StepCard = ({
 
             {step.translation && (
               <>
-                <div className="h-px bg-amber-200/60 my-2.5" />
-                <p className="text-xs text-gray-700 leading-relaxed">{step.translation}</p>
+                <div className={`h-px my-2.5 ${darkMode ? 'bg-amber-700/40' : 'bg-amber-200/60'}`} />
+                <p className={`text-xs leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{step.translation}</p>
               </>
             )}
           </div>
@@ -947,6 +955,7 @@ export default function PrayerGuide({ onBack }) {
                 onPlayItem={handlePlayItem}
                 onOpenLightbox={setLightboxStep}
                 cardRef={(el) => { cardRefs.current[cardKey] = el }}
+                darkMode={darkMode}
               />
             )
           })}

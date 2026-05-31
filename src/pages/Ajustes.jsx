@@ -6,14 +6,16 @@ import LocationSelector from '../components/LocationSelector'
 import { RECITERS } from '../data/reciters'
 import { requestNotificationPermission, getPermission, sendTestNotification } from '../utils/notifications'
 
-function SettingRow({ icon: Icon, iconColor = 'text-amber-600', iconBg = 'bg-amber-50', label, children }) {
+function SettingRow({ icon: Icon, iconColor = 'text-amber-600', iconBg = 'bg-amber-50', label, children, darkMode }) {
   return (
-    <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/60 px-4 py-4 flex items-center justify-between">
+    <div className={`rounded-2xl shadow-sm border px-4 py-4 flex items-center justify-between ${
+      darkMode ? 'bg-[#1e1e1e]/70 backdrop-blur-md border-[#2a2a2a]' : 'bg-white/70 backdrop-blur-md border-white/60'
+    }`}>
       <div className="flex items-center gap-3 min-w-0">
-        <div className={`w-10 h-10 rounded-2xl ${iconBg} flex items-center justify-center shrink-0`}>
+        <div className={`w-10 h-10 rounded-2xl ${darkMode ? 'bg-white/10' : iconBg} flex items-center justify-center shrink-0`}>
           <Icon size={18} className={iconColor} strokeWidth={2.2} />
         </div>
-        <span className="text-sm font-semibold text-gray-800">{label}</span>
+        <span className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{label}</span>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         {children}
@@ -63,10 +65,10 @@ export default function Ajustes() {
       className="pt-4 pb-2"
     >
       <div className="mb-6 px-1">
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+        <p className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           Preferencias
         </p>
-        <h1 className="text-2xl font-black text-gray-800 mt-0.5">Ajustes</h1>
+        <h1 className={`text-2xl font-black mt-0.5 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Ajustes</h1>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -75,6 +77,7 @@ export default function Ajustes() {
           iconColor="text-cyan-500"
           iconBg="bg-cyan-50"
           label="Ubicación"
+          darkMode={darkMode}
         >
           <button
             onClick={() => setLocationModalOpen(true)}
@@ -86,15 +89,17 @@ export default function Ajustes() {
         </SettingRow>
 
         {/* ── Notificaciones de rezo ─────────────────────────────── */}
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/60 overflow-hidden">
+        <div className={`rounded-2xl shadow-sm border overflow-hidden ${
+          darkMode ? 'bg-[#1e1e1e]/70 backdrop-blur-md border-[#2a2a2a]' : 'bg-white/70 backdrop-blur-md border-white/60'
+        }`}>
           <div className="px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center shrink-0">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${darkMode ? 'bg-white/10' : 'bg-emerald-50'}`}>
                 <Bell size={18} className="text-emerald-600" strokeWidth={2.2} />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-gray-800">Notificaciones de rezo</p>
-                <p className="text-[11px] text-gray-500">Aviso a la hora de cada oración</p>
+                <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Notificaciones de rezo</p>
+                <p className={`text-[11px] ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Aviso a la hora de cada oración</p>
               </div>
             </div>
             <button
@@ -118,10 +123,10 @@ export default function Ajustes() {
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="overflow-hidden border-t border-amber-100"
+                className={`overflow-hidden border-t ${darkMode ? 'border-[#2a2a2a]' : 'border-amber-100'}`}
               >
                 <div className="px-4 py-3 flex items-center justify-between gap-3">
-                  <p className="text-[11px] text-gray-500 leading-snug flex-1">
+                  <p className={`text-[11px] leading-snug flex-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                     En iPhone funcionan mejor con la app añadida a la pantalla de inicio.
                   </p>
                   <button
@@ -142,23 +147,25 @@ export default function Ajustes() {
         </div>
 
         {/* ── Recitador del Quran ────────────────────────────────── */}
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/60 overflow-hidden">
+        <div className={`rounded-2xl shadow-sm border overflow-hidden ${
+          darkMode ? 'bg-[#1e1e1e]/70 backdrop-blur-md border-[#2a2a2a]' : 'bg-white/70 backdrop-blur-md border-white/60'
+        }`}>
           <button
             onClick={() => setReciterOpen((v) => !v)}
-            className="w-full px-4 py-4 flex items-center justify-between active:bg-white/40 transition-colors"
+            className={`w-full px-4 py-4 flex items-center justify-between transition-colors ${darkMode ? 'active:bg-white/10' : 'active:bg-white/40'}`}
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center shrink-0">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${darkMode ? 'bg-white/10' : 'bg-emerald-50'}`}>
                 <Mic size={18} className="text-emerald-600" strokeWidth={2.2} />
               </div>
               <div className="text-left min-w-0">
-                <p className="text-sm font-semibold text-gray-800">Recitador del Quran</p>
-                <p className="text-[11px] text-gray-500 truncate">{reciter.name} · {reciter.desc}</p>
+                <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Recitador del Quran</p>
+                <p className={`text-[11px] truncate ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{reciter.name} · {reciter.desc}</p>
               </div>
             </div>
             <ChevronDown
               size={18}
-              className={`text-gray-400 transition-transform ${reciterOpen ? 'rotate-180' : ''}`}
+              className={`transition-transform ${darkMode ? 'text-gray-500' : 'text-gray-400'} ${reciterOpen ? 'rotate-180' : ''}`}
             />
           </button>
 
@@ -169,7 +176,7 @@ export default function Ajustes() {
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.22, ease: 'easeOut' }}
-                className="overflow-hidden border-t border-amber-100"
+                className={`overflow-hidden border-t ${darkMode ? 'border-[#2a2a2a]' : 'border-amber-100'}`}
               >
                 <div className="px-2 py-2 flex flex-col gap-1">
                   {RECITERS.map((r) => {
@@ -181,15 +188,15 @@ export default function Ajustes() {
                         className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl transition-all ${
                           active
                             ? 'shadow-md text-white'
-                            : 'active:bg-amber-50 text-gray-700'
+                            : darkMode ? 'active:bg-white/10 text-gray-300' : 'active:bg-amber-50 text-gray-700'
                         }`}
                         style={active ? { background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #EA580C 100%)' } : undefined}
                       >
                         <div className="text-left min-w-0">
-                          <p className={`text-sm font-bold ${active ? 'text-white' : 'text-gray-800'}`}>
+                          <p className={`text-sm font-bold ${active ? 'text-white' : darkMode ? 'text-white' : 'text-gray-800'}`}>
                             {r.name}
                           </p>
-                          <p className={`text-[10px] ${active ? 'text-white/85' : 'text-gray-500'}`}>
+                          <p className={`text-[10px] ${active ? 'text-white/85' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                             {r.desc}
                           </p>
                         </div>
@@ -212,21 +219,22 @@ export default function Ajustes() {
           iconColor="text-violet-500"
           iconBg="bg-violet-50"
           label="Tamaño de transliteración"
+          darkMode={darkMode}
         >
           <button
             onClick={decreaseFont}
-            className="w-8 h-8 rounded-xl bg-white/80 shadow-sm flex items-center justify-center active:scale-90 transition-transform"
+            className={`w-8 h-8 rounded-xl shadow-sm flex items-center justify-center active:scale-90 transition-transform ${darkMode ? 'bg-white/10' : 'bg-white/80'}`}
           >
-            <Minus size={14} className="text-gray-600" />
+            <Minus size={14} className={darkMode ? 'text-gray-300' : 'text-gray-600'} />
           </button>
-          <span className="w-10 text-center text-sm font-bold text-gray-700 tabular-nums">
+          <span className={`w-10 text-center text-sm font-bold tabular-nums ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
             {fontSize}px
           </span>
           <button
             onClick={increaseFont}
-            className="w-8 h-8 rounded-xl bg-white/80 shadow-sm flex items-center justify-center active:scale-90 transition-transform"
+            className={`w-8 h-8 rounded-xl shadow-sm flex items-center justify-center active:scale-90 transition-transform ${darkMode ? 'bg-white/10' : 'bg-white/80'}`}
           >
-            <Plus size={14} className="text-gray-600" />
+            <Plus size={14} className={darkMode ? 'text-gray-300' : 'text-gray-600'} />
           </button>
         </SettingRow>
 
@@ -235,6 +243,7 @@ export default function Ajustes() {
           iconColor="text-rose-500"
           iconBg="bg-rose-50"
           label="Género"
+          darkMode={darkMode}
         >
           <div className="flex gap-2">
             <button
@@ -242,7 +251,7 @@ export default function Ajustes() {
               className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition-all ${
                 userGender === 'hombre'
                   ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : darkMode ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               Hombre
@@ -252,7 +261,7 @@ export default function Ajustes() {
               className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition-all ${
                 userGender === 'mujer'
                   ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : darkMode ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               Mujer
@@ -262,9 +271,10 @@ export default function Ajustes() {
 
         <SettingRow
           icon={darkMode ? Moon : Sun}
-          iconColor={darkMode ? 'text-indigo-500' : 'text-yellow-600'}
+          iconColor={darkMode ? 'text-indigo-400' : 'text-yellow-600'}
           iconBg={darkMode ? 'bg-indigo-50' : 'bg-yellow-50'}
           label="Modo Oscuro"
+          darkMode={darkMode}
         >
           <button
             onClick={() => setDarkMode(!darkMode)}
@@ -302,7 +312,7 @@ export default function Ajustes() {
         </div>
       </motion.div>
 
-      <div className="flex items-center justify-center gap-1.5 mt-5 text-[11px] text-gray-500">
+      <div className={`flex items-center justify-center gap-1.5 mt-5 text-[11px] ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
         <Info size={12} />
         <span>Los cambios se guardan automáticamente</span>
       </div>
